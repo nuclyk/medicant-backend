@@ -45,10 +45,12 @@ func (c Client) GetRole(name string) (*Role, error) {
 	var role Role
 
 	row := c.db.QueryRow(getRole, name)
-	row.Scan(&role.Name)
-
 	if err := row.Err(); err != nil {
-		return nil, fmt.Errorf("couldn't get the role: %v", err)
+		return nil, err
+	}
+
+	if err := row.Scan(&role.Name); err != nil {
+		return nil, err
 	}
 
 	return &role, nil

@@ -48,7 +48,7 @@ func (c Client) CreateRetreat(params CreateRetreatParams) (*Retreat, error) {
 		return nil, fmt.Errorf("couldn't create a new retreat: %v", err)
 	}
 
-	id, err := result.LastInsertId()
+	id, _ := result.LastInsertId()
 
 	retreat, err := c.GetRetreat(strconv.FormatInt(id, 10))
 	if err != nil {
@@ -72,12 +72,13 @@ func (c Client) GetRetreats() (*[]Retreat, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't couldn't execute a query: %v", err)
 	}
+	defer rows.Close()
 
 	var retreats []Retreat
 
 	for rows.Next() {
 		var retreat Retreat
-		rows.Scan(
+		if err := rows.Scan(
 			&retreat.ID,
 			&retreat.RetreatCode,
 			&retreat.Created_at,
@@ -85,7 +86,17 @@ func (c Client) GetRetreats() (*[]Retreat, error) {
 			&retreat.Type,
 			&retreat.Start_date,
 			&retreat.End_date,
-		)
+		); err != nil {
+			return nil, err
+		}
+
+		if err := rows.Close(); err != nil {
+			return nil, err
+		}
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
+
 		retreats = append(retreats, retreat)
 	}
 

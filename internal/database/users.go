@@ -195,7 +195,7 @@ func (c Client) GetUsers() ([]User, error) {
 
 	rows, err := c.db.Query(getUsers)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't execute a query: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -204,7 +204,7 @@ func (c Client) GetUsers() ([]User, error) {
 	for rows.Next() {
 		var user User
 
-		rows.Scan(
+		if err := rows.Scan(
 			&user.ID,
 			&user.Created_at,
 			&user.Updated_at,
@@ -223,7 +223,16 @@ func (c Client) GetUsers() ([]User, error) {
 			&user.IsCheckedIn,
 			&user.Diet,
 			&user.Place,
-		)
+		); err != nil {
+			return nil, err
+		}
+
+		if err := rows.Close(); err != nil {
+			return nil, err
+		}
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
 
 		users = append(users, user)
 	}
@@ -284,16 +293,16 @@ const updatePassword = `
 func (c Client) UpdatePassword(searchValue string, password UpdatePasswordParams) (string, error) {
 	hashedPassword, err := auth.HashPassword(password.Password)
 	if err != nil {
-		return fmt.Sprintf("failed to hash the password"), err
+		return "failed to hash the password", err
 	}
 
 	_, err = c.db.Exec(updatePassword, hashedPassword, sql.Named("searchValue", searchValue))
 
 	if err != nil {
-		return fmt.Sprintf("password change failed"), err
+		return "password change failed", err
 	}
 
-	return fmt.Sprintf("password change successful"), nil
+	return "password change successful", nil
 }
 
 const updateUser = `

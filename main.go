@@ -15,7 +15,6 @@ import (
 type Config struct {
 	db          *database.Client
 	tokenSecret string
-	val         int
 	log         *log.Logger
 }
 
@@ -115,5 +114,5 @@ func main() {
 	// QR codes
 	mux.HandleFunc("POST /api/qrcode", cfg.handlerQrcode)
 
-	log.Fatal(http.ListenAndServe(":8080", enableCORS(mux)))
+	log.Fatal(http.ListenAndServe(":8080", enableCORS(mux))) // #nosec G114
 }

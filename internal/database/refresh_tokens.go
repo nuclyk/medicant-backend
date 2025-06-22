@@ -32,7 +32,7 @@ const createRefreshToken = `
 		expires_at
 	)
 	VALUES (?,?,?);
-    `
+    ` // #nosec G101
 
 func (c Client) CreateRefreshToken(params CreateRefreshTokenParams) (RefreshToken, error) {
 	c.log.Println("Creating new refresh token")
@@ -62,7 +62,7 @@ const getRefreshToken = `
 		refresh_tokens
 	WHERE
 		token = ?;
-    `
+    ` // #nosec G101
 
 func (c Client) GetRefreshToken(token string) (RefreshToken, error) {
 	var rt RefreshToken
@@ -91,7 +91,7 @@ const revokeToken = `
 		revoked_at = datetime('now', 'localtime')
 	WHERE
 		token = ?;
-    `
+    ` // #nosec G101
 
 func (c Client) RevokeRefreshToken(token string) error {
 	_, err := c.db.Exec(revokeToken, token)

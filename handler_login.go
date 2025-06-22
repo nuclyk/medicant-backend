@@ -54,11 +54,16 @@ func (cfg Config) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg.db.CreateRefreshToken(database.CreateRefreshTokenParams{
+	_, err = cfg.db.CreateRefreshToken(database.CreateRefreshTokenParams{
 		Token:     rt,
 		UserID:    user.ID,
 		ExpiresAt: time.Now().Add(time.Hour * 24 * 30).String(),
 	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error inserting refresh token to db", err)
+		return
+	}
 
 	cfg.log.Println("Checking password")
 	valid := auth.CheckPasswordHash(user.Password, req.Password)

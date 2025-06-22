@@ -67,11 +67,20 @@ func (c Client) GetPlaces() ([]Place, error) {
 
 	for rows.Next() {
 		var place Place
-		rows.Scan(
+		if err := rows.Scan(
 			&place.Name,
 			&place.Capacity,
-		)
+		); err != nil {
+			return nil, err
+		}
 		places = append(places, place)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return places, nil
