@@ -94,7 +94,7 @@ func Validate(tokenString, tokenSecret string) (uuid.UUID, error) {
 	}
 
 	if issuer != string(TokenTypeAccess) {
-		return uuid.Nil, errors.New("Invalid issuer")
+		return uuid.Nil, errors.New("invalid issuer")
 	}
 
 	userID, err := uuid.Parse(userIDString)

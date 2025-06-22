@@ -61,7 +61,7 @@ const getRefreshToken = `
 	FROM
 		refresh_tokens
 	WHERE
-		token = ?;
+		token = $1;
     `
 
 func (c Client) GetRefreshToken(token string) (RefreshToken, error) {
