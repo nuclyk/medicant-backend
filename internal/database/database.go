@@ -35,7 +35,7 @@ func NewClient(pathToDB string) (Client, error) {
 }
 
 const createAdmin = `
-	INSERT INTO users ( id, first_name, last_name, password, email,
+	INSERT OR IGNORE INTO users ( id, first_name, last_name, password, email,
 		phone, gender, nationality, role, retreat_id, check_in_date, leave_date
 	  )
 	VALUES

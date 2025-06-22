@@ -26,7 +26,11 @@ func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	}
 
 	w.WriteHeader(code)
-	w.Write(res)
+	_, err = w.Write(res)
+	if err != nil {
+		log.Printf("Error writing response: %s", err)
+		return
+	}
 }
 
 func respondWithJson(w http.ResponseWriter, code int, payload any) {
@@ -40,5 +44,9 @@ func respondWithJson(w http.ResponseWriter, code int, payload any) {
 	}
 
 	w.WriteHeader(code)
-	w.Write(res)
+	_, err = w.Write(res)
+	if err != nil {
+		log.Printf("Error writing response: %s", err)
+		return
+	}
 }
