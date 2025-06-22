@@ -10,8 +10,6 @@ import (
 	"github.com/nuclyk/medicant/internal/database"
 )
 
-// TODO: Implement auth middleware
-
 type Config struct {
 	db          *database.Client
 	tokenSecret string
