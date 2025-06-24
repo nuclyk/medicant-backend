@@ -1,6 +1,8 @@
 .env
 medicant.sql
+medicant.db
 medicant
 build/
 .DS_Store
 out
+db/medicant.db

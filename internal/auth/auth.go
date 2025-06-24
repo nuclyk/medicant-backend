@@ -32,18 +32,23 @@ func CheckPasswordHash(hashedPassword string, password string) error {
 func MakeRefreshToken() (string, error) {
 	token := make([]byte, 32)
 	_, err := rand.Read(token)
+
 	if err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(token), nil
 }
 
 func GetBearerToken(headers http.Header) (string, error) {
 	authHeader := headers.Get("Authorization")
+
 	if authHeader == "" {
 		return "", ErrNoAuthHeaderIncluded
 	}
+
 	splitAuth := strings.Split(authHeader, " ")
+
 	if len(splitAuth) < 2 || splitAuth[0] != "Bearer" {
 		return "", errors.New("malformed authorization header")
 	}
@@ -70,11 +75,13 @@ func MakeJWT(userID uuid.UUID, role string, tokenSecret string, expires time.Dur
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	return token.SignedString(signingKey)
 }
 
 func Validate(tokenString, tokenSecret string) (uuid.UUID, error) {
 	claimsStruct := jwt.RegisteredClaims{}
+
 	token, err := jwt.ParseWithClaims(tokenString, &claimsStruct, func(t *jwt.Token) (any, error) {
 		return []byte(tokenSecret), nil
 	})
@@ -84,11 +91,13 @@ func Validate(tokenString, tokenSecret string) (uuid.UUID, error) {
 	}
 
 	userIDString, err := token.Claims.GetSubject()
+
 	if err != nil {
 		return uuid.Nil, err
 	}
 
 	issuer, err := token.Claims.GetIssuer()
+
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -98,6 +107,7 @@ func Validate(tokenString, tokenSecret string) (uuid.UUID, error) {
 	}
 
 	userID, err := uuid.Parse(userIDString)
+
 	if err != nil {
 		return uuid.Nil, errors.New("error when parsing uuid string")
 	}
