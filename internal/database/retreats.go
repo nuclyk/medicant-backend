@@ -16,8 +16,8 @@ type Retreat struct {
 
 type CreateRetreatParams struct {
 	Type       string
-	Start_date string
-	End_date   string
+	Start_date *string
+	End_date   *string
 }
 
 const createRetreat = `
@@ -35,7 +35,8 @@ const createRetreat = `
 func (c Client) CreateRetreat(params CreateRetreatParams) (*Retreat, error) {
 	c.log.Println("Creating new retreat")
 
-	retreat_code := fmt.Sprintf("%s-%s", params.Type[:3], params.Start_date[5:])
+	start_date := *params.Start_date
+	retreat_code := fmt.Sprintf("%s-%s", params.Type[:3], start_date[5:])
 
 	result, err := c.db.Exec(createRetreat,
 		retreat_code,

@@ -38,8 +38,8 @@ func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request) 
 
 	retreat, err := cfg.db.CreateRetreat(database.CreateRetreatParams{
 		Type:       params.Type,
-		Start_date: params.Start_date,
-		End_date:   params.End_date,
+		Start_date: &params.Start_date,
+		End_date:   &params.End_date,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't create a new retreat", err)
@@ -95,11 +95,11 @@ func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if params.Start_date != "" {
-		retreat.Start_date = params.Start_date
+		retreat.Start_date = &params.Start_date
 	}
 
 	if params.End_date != "" {
-		retreat.End_date = params.End_date
+		retreat.End_date = &params.End_date
 	}
 
 	updatedRetreat, err := cfg.db.UpdateRetreat(retreatID, *retreat)
