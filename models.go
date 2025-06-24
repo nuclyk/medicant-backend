@@ -191,6 +191,7 @@ func (cfg Config) databaseRetreatsToRetreats(dbRetreats []database.Retreat) []Re
 	for _, retreat := range dbRetreats {
 		var startDate string
 		var endDate string
+
 		if retreat.Start_date != nil {
 			startDate = *retreat.Start_date
 		}
@@ -198,6 +199,7 @@ func (cfg Config) databaseRetreatsToRetreats(dbRetreats []database.Retreat) []Re
 		if retreat.End_date != nil {
 			endDate = *retreat.End_date
 		}
+
 		retreats = append(retreats, Retreat{
 			ID:          retreat.ID,
 			RetreatCode: retreat.RetreatCode,

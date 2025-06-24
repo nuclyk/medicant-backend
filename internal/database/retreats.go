@@ -90,15 +90,15 @@ func (c Client) GetRetreats() (*[]Retreat, error) {
 		); err != nil {
 			return nil, err
 		}
-
-		if err := rows.Close(); err != nil {
-			return nil, err
-		}
-		if err := rows.Err(); err != nil {
-			return nil, err
-		}
-
 		retreats = append(retreats, retreat)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	if rows.Err() != nil {

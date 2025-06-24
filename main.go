@@ -44,6 +44,11 @@ func main() {
 		log.Fatal("Database url has to be set in .env")
 	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT has not been set")
+	}
+
 	secret := os.Getenv("SECRET")
 	if secret == "" {
 		log.Fatal("Secret token has to be set")
@@ -112,5 +117,5 @@ func main() {
 	// QR codes
 	mux.HandleFunc("POST /api/qrcode", cfg.handlerQrcode)
 
-	log.Fatal(http.ListenAndServe(":8080", enableCORS(mux))) // #nosec G114
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, enableCORS(mux))) // #nosec G114
 }

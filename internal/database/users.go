@@ -227,14 +227,14 @@ func (c Client) GetUsers() ([]User, error) {
 			return nil, err
 		}
 
-		if err := rows.Close(); err != nil {
-			return nil, err
-		}
-		if err := rows.Err(); err != nil {
-			return nil, err
-		}
-
 		users = append(users, user)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	if rows.Err() != nil {

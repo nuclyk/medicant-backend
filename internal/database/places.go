@@ -64,6 +64,7 @@ func (c Client) GetPlaces() ([]Place, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var place Place
