@@ -11,14 +11,14 @@ func (cfg Config) handlerRolesCreate(w http.ResponseWriter, r *http.Request) {
 	var params database.Role
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
+	if err := decoder.Decode(&params); err != nil {
 
-	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error when decoding", err)
 		return
 	}
 
 	role, err := cfg.db.CreateRole(params)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't create a new role", err)
 		return
@@ -52,17 +52,21 @@ func (cfg Config) handlerRolesGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg Config) handlerRolesUpdate(w http.ResponseWriter, r *http.Request) {
-	roleID := r.PathValue("name")
 	var params database.Role
+	roleID := r.PathValue("name")
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't decode the role params", err)
+		return
 	}
 
 	role, err := cfg.db.UpdateRole(roleID, params)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't update the role", err)
+		return
 	}
 
 	respondWithJson(w, http.StatusOK, cfg.databaseRoleToRole(role))

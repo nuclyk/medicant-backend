@@ -12,12 +12,14 @@ func (cfg Config) handlerPlacesCreate(w http.ResponseWriter, r *http.Request) {
 	var params database.Place
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error while decoding request body", err)
 		return
 	}
 
 	result, err := cfg.db.CreatePlace(params)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "creating new place failed", err)
 		return
@@ -31,6 +33,7 @@ func (cfg Config) handlerPlacesGet(w http.ResponseWriter, r *http.Request) {
 
 	if placeName != "" {
 		result, err := cfg.db.GetPlace(placeName)
+
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("couldn't find: %s", placeName), err)
 			return
@@ -60,12 +63,14 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error when decoding the json", err)
 		return
 	}
 
 	place, err := cfg.db.GetPlace(placeName)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't find place", err)
 		return
@@ -81,6 +86,7 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, err := cfg.db.UpdatePlace(placeName, place)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error when updating", err)
 		return

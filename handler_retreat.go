@@ -18,6 +18,7 @@ func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request) 
 	var params CreateRetreatParams
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "coldn't decode the request", err)
 		return
@@ -32,7 +33,7 @@ func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request) 
 
 	if params.Type != "fixed" && params.Type != "flexible" {
 		err := errors.New("type of the retreat is invalid")
-		respondWithError(w, http.StatusInternalServerError, "type must be 'fixed' or 'flexible'", err)
+		respondWithError(w, http.StatusInternalServerError, "type of the retreat must be 'fixed' or 'flexible'", err)
 		return
 	}
 
@@ -41,6 +42,7 @@ func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request) 
 		Start_date: &params.Start_date,
 		End_date:   &params.End_date,
 	})
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't create a new retreat", err)
 		return
@@ -66,6 +68,7 @@ func (cfg Config) handlerRetreatsGet(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
+			return
 		}
 
 		respondWithJson(w, http.StatusOK, cfg.databaseRetreatsToRetreats(*retreats))
@@ -79,12 +82,14 @@ func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request) {
 	var params CreateRetreatParams
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't decode the request body", err)
 		return
 	}
 
 	retreat, err := cfg.db.GetRetreat(retreatID)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't get the retreat", err)
 		return
@@ -103,6 +108,7 @@ func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updatedRetreat, err := cfg.db.UpdateRetreat(retreatID, *retreat)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't update the retreat", err)
 		return

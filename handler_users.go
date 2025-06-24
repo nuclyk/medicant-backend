@@ -32,6 +32,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	var params CreateUserParams
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error while decoding request body", err)
 		return
@@ -40,9 +41,11 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	// If password is provided then hash it
 	if params.Password != "" {
 		hashedPassword, err := auth.HashPassword(params.Password)
+
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "error while hashing the password", err)
 		}
+
 		params.Password = string(hashedPassword)
 	}
 
@@ -76,12 +79,14 @@ func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
 	searchValue := r.PathValue("searchValue")
 
 	token, err := auth.GetBearerToken(r.Header)
+
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error(), err)
+		respondWithError(w, http.StatusBadRequest, "token might be malformed", err)
 		return
 	}
 
 	_, err = auth.Validate(token, cfg.tokenSecret)
+
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "unauthorized", err)
 		return
@@ -96,7 +101,6 @@ func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
 		}
 
 		respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
-
 	} else {
 		users, err := cfg.db.GetUsers()
 
@@ -118,8 +122,7 @@ func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
-	if err != nil {
+	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusBadRequest, "couldn't decode the request body", err)
 		return
 	}
@@ -161,6 +164,7 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := cfg.db.GetUser(searchValue)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't fetch a user", err)
 		return
@@ -223,6 +227,7 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err = cfg.db.UpdateUser(searchValue, user)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't update the user", err)
 		return

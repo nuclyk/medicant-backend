@@ -40,9 +40,8 @@ type UpdatePasswordParams struct {
 }
 
 const createUser = `
-	INSERT
-		INTO
-		users ( 
+	INSERT INTO
+	  users (
 		id,
 		first_name,
 		last_name,
@@ -59,9 +58,9 @@ const createUser = `
 		is_checked_in,
 		diet,
 		place
-	)
+	  )
 	VALUES
-	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `
 
 func (c Client) CreateUser(params CreateUserParams) (*User, error) {
@@ -89,12 +88,13 @@ func (c Client) CreateUser(params CreateUserParams) (*User, error) {
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create the new user: %v", err)
+		return nil, err
 	}
 
 	user, err := c.GetUser(params.Email)
+
 	if err != nil {
-		return nil, fmt.Errorf("couldn't get the new created user: %v", err)
+		return nil, err
 	}
 
 	return user, nil
@@ -156,11 +156,11 @@ func (c Client) GetUser(searchValue string) (*User, error) {
 		&user.Diet,
 		&user.Place,
 	); err != nil {
-		return nil, fmt.Errorf("couldn't scan a row: %v", err)
+		return nil, err
 	}
 
 	if err := row.Err(); err != nil {
-		return nil, fmt.Errorf("couldn't get the user: %v", err)
+		return nil, err
 	}
 
 	return &user, nil
@@ -194,6 +194,7 @@ func (c Client) GetUsers() ([]User, error) {
 	c.log.Println("Getting all users")
 
 	rows, err := c.db.Query(getUsers)
+
 	if err != nil {
 		return nil, err
 	}
@@ -233,6 +234,7 @@ func (c Client) GetUsers() ([]User, error) {
 	if err := rows.Close(); err != nil {
 		return nil, err
 	}
+
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -292,6 +294,7 @@ const updatePassword = `
 
 func (c Client) UpdatePassword(searchValue string, password UpdatePasswordParams) (string, error) {
 	hashedPassword, err := auth.HashPassword(password.Password)
+
 	if err != nil {
 		return "failed to hash the password", err
 	}
@@ -373,10 +376,11 @@ func (c Client) UpdateUser(searchValue string, params *User) (*User, error) {
 	)
 
 	if row.Err() != nil {
-		return nil, fmt.Errorf("couldn't update the user: %v", row.Err())
+		return nil, row.Err()
 	}
 
 	var user User
+
 	if err := row.Scan(
 		&user.ID,
 		&user.Created_at,
@@ -397,7 +401,7 @@ func (c Client) UpdateUser(searchValue string, params *User) (*User, error) {
 		&user.Diet,
 		&user.Place,
 	); err != nil {
-		return nil, fmt.Errorf("couldn't return the updated user: %v", err)
+		return nil, err
 	}
 
 	return &user, nil
@@ -409,8 +413,9 @@ func (c Client) DeleteUser(id string) (string, error) {
 	c.log.Printf("Deleting the user with id: %s", id)
 
 	_, err := c.db.Exec(deleteUser, id)
+
 	if err != nil {
-		return "", fmt.Errorf("couldn't delete the user: %v", err)
+		return "", err
 	}
 
 	return fmt.Sprintf("User with the id `%s` was deleted", id), nil
