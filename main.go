@@ -36,7 +36,7 @@ func enableCORS(next http.Handler) http.Handler {
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Printf("Error loading .env file: %v", err)
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")

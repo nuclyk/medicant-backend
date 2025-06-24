@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS retreats (
   created_at TEXT DEFAULT (datetime ('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime ('now', 'localtime')),
   type TEXT NOT NULL CHECK (type IN ('fixed', 'flexible')),
-  start_date TEXT,
+  start_date TEXT "",
   end_date TEXT
 );
 

@@ -1,7 +1,19 @@
-FROM --platform=linux/amd64 debian:stable-slim
+FROM golang:1.24
 
-RUN apt-get update && apt-get install -y ca-certificates
+WORKDIR /app
 
-ADD medicant /usr/bin/medicant
+# Create volume to store database file
+RUN mkdir -p /app/db
+VOLUME [ "/app/db" ]
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=1 GOOS=linux go build -o /usr/bin/medicant
+
+EXPOSE 8080
 
 CMD ["medicant"]
+
