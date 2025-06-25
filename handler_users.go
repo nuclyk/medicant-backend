@@ -44,9 +44,25 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "error while hashing the password", err)
+			return
 		}
 
 		params.Password = string(hashedPassword)
+	}
+
+	// Check if the user with this email already exists
+	users, err := cfg.db.GetUsers()
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
+		return
+	}
+
+	for _, user := range users {
+		if user.Email == params.Email {
+			respondWithError(w, http.StatusInternalServerError, "email exists", errors.New("email not unique"))
+			return
+		}
 	}
 
 	user, err := cfg.db.CreateUser(database.CreateUserParams{
