@@ -60,7 +60,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 
 	for _, user := range users {
 		if user.Email == params.Email {
-			respondWithError(w, http.StatusInternalServerError, "email exists", errors.New("email not unique"))
+			respondWithError(w, http.StatusInternalServerError, "Email already exists.", errors.New("email not unique"))
 			return
 		}
 	}
