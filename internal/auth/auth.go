@@ -13,6 +13,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type ValidUser struct {
+	ID   uuid.UUID
+	Role string
+}
+
+type CustomClaims struct {
+	Role string `json:"role"`
+	jwt.RegisteredClaims
+}
+
 type TokenType string
 
 const (
@@ -59,11 +69,6 @@ func GetBearerToken(headers http.Header) (string, error) {
 func MakeJWT(userID uuid.UUID, role string, tokenSecret string, expires time.Duration) (string, error) {
 	signingKey := []byte(tokenSecret)
 
-	type CustomClaims struct {
-		Role string `json:"role"`
-		jwt.RegisteredClaims
-	}
-
 	claims := CustomClaims{
 		role,
 		jwt.RegisteredClaims{
@@ -79,38 +84,38 @@ func MakeJWT(userID uuid.UUID, role string, tokenSecret string, expires time.Dur
 	return token.SignedString(signingKey)
 }
 
-func Validate(tokenString, tokenSecret string) (uuid.UUID, error) {
-	claimsStruct := jwt.RegisteredClaims{}
+func Validate(tokenString, tokenSecret string) (ValidUser, error) {
+	claimsStruct := CustomClaims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, &claimsStruct, func(t *jwt.Token) (any, error) {
 		return []byte(tokenSecret), nil
 	})
 
 	if err != nil {
-		return uuid.Nil, err
+		return ValidUser{}, err
 	}
 
 	userIDString, err := token.Claims.GetSubject()
 
 	if err != nil {
-		return uuid.Nil, err
+		return ValidUser{}, err
 	}
 
 	issuer, err := token.Claims.GetIssuer()
 
 	if err != nil {
-		return uuid.Nil, err
+		return ValidUser{}, err
 	}
 
 	if issuer != string(TokenTypeAccess) {
-		return uuid.Nil, errors.New("invalid issuer")
+		return ValidUser{}, errors.New("invalid issuer")
 	}
 
 	userID, err := uuid.Parse(userIDString)
 
 	if err != nil {
-		return uuid.Nil, errors.New("error when parsing uuid string")
+		return ValidUser{}, errors.New("error when parsing uuid string")
 	}
 
-	return userID, nil
+	return ValidUser{ID: userID, Role: claimsStruct.Role}, nil
 }

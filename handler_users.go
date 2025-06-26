@@ -101,12 +101,14 @@ func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = auth.Validate(token, cfg.tokenSecret)
+	validUser, err := auth.Validate(token, cfg.tokenSecret)
 
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "unauthorized", err)
 		return
 	}
+
+	validRole := validUser.Role == "admin" || validUser.Role == "volunteer"
 
 	if searchValue != "" {
 		user, err := cfg.db.GetUser(searchValue)
@@ -116,8 +118,25 @@ func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// admin or volunteer can fetch any user
+		// if logged in user is not an admin or volunteer,
+		// they can fetch only their own user details
+		if !validRole || user.ID != validUser.ID {
+			noPermission := "no permission to fetch the user details"
+			respondWithError(w, http.StatusUnauthorized, noPermission, errors.New(noPermission))
+			return
+		}
+
 		respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 	} else {
+
+		// admin or volunteer can fetch all users
+		if !validRole {
+			noPermission := "no permission to fetch users"
+			respondWithError(w, http.StatusUnauthorized, noPermission, errors.New(noPermission))
+			return
+		}
+
 		users, err := cfg.db.GetUsers()
 
 		if err != nil {
