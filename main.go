@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 
@@ -58,6 +59,13 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:         "0.0.0.0:" + port,
+		Handler:      enableCORS(mux),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
 
 	// Assets directory
 	assetsHandler := http.StripPrefix("/assets", http.FileServer(http.Dir(assets)))
@@ -102,7 +110,11 @@ func main() {
 	// QR codes
 	mux.HandleFunc("POST /api/qrcode", cfg.handlerQrcode)
 
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, enableCORS(mux))) // #nosec G114
+	log.Println("Server starting on port", port)
+	err = server.ListenAndServe()
+	if err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
 
 func enableCORS(next http.Handler) http.Handler {

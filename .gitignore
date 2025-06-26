@@ -5,4 +5,4 @@ medicant
 build/
 .DS_Store
 out
-db/medicant.db
+./db/medicant.db
