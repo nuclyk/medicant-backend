@@ -2,12 +2,12 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3"
-
 	"github.com/nuclyk/medicant/internal/auth"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 type Client struct {
@@ -15,11 +15,17 @@ type Client struct {
 	log *log.Logger
 }
 
-func NewClient(pathToDB string) (Client, error) {
+func NewClient(url string) (Client, error) {
 	log.Println("Creating new database client")
 	dbLog := log.New(os.Stdout, "db:", log.Lshortfile)
 
-	db, err := sql.Open("sqlite3", pathToDB)
+	db, err := sql.Open("libsql", url)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open db %s", err)
+		os.Exit(1)
+	}
+	defer db.Close()
 
 	if err != nil {
 		return Client{}, err
