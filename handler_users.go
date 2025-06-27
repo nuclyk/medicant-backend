@@ -91,61 +91,32 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 }
 
-func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request) {
 	searchValue := r.PathValue("searchValue")
 
-	token, err := auth.GetBearerToken(r.Header)
+	if searchValue == "" {
+		respondWithError(w, http.StatusInternalServerError, "search value can't be empty", errors.New("empty search value"))
+		return
 
+	}
+
+	user, err := cfg.db.GetUser(searchValue)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "token might be malformed", err)
+		respondWithError(w, http.StatusInternalServerError, "couldn't get user", err)
 		return
 	}
 
-	validUser, err := auth.Validate(token, cfg.tokenSecret)
+	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
+}
 
+func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
+	users, err := cfg.db.GetUsers()
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "unauthorized", err)
+		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
 		return
 	}
 
-	validRole := validUser.Role == "admin" || validUser.Role == "volunteer"
-
-	if searchValue != "" {
-		user, err := cfg.db.GetUser(searchValue)
-
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "couldn't get user", err)
-			return
-		}
-
-		// admin or volunteer can fetch any user
-		// if logged in user is not an admin or volunteer,
-		// they can fetch only their own user details
-		if !validRole || user.ID != validUser.ID {
-			noPermission := "no permission to fetch the user details"
-			respondWithError(w, http.StatusUnauthorized, noPermission, errors.New(noPermission))
-			return
-		}
-
-		respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
-	} else {
-
-		// admin or volunteer can fetch all users
-		if !validRole {
-			noPermission := "no permission to fetch users"
-			respondWithError(w, http.StatusUnauthorized, noPermission, errors.New(noPermission))
-			return
-		}
-
-		users, err := cfg.db.GetUsers()
-
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
-			return
-		}
-
-		respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
-	}
+	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
 }
 
 func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Request) {
@@ -186,6 +157,8 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 	var params CreateUserParams
 	searchValue := r.PathValue("searchValue")
 
+	validUser, validRole := validateUser(w, r.Header, cfg.tokenSecret)
+
 	if searchValue == "" {
 		respondWithError(w, http.StatusBadRequest, "provide valid id or email", fmt.Errorf("invalid id or email"))
 		return
@@ -202,6 +175,15 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't fetch a user", err)
+		return
+	}
+
+	// admin or volunteer can fetch any user
+	// if logged in user is not an admin or volunteer,
+	// they can fetch only their own user details
+	if !validRole && user.ID != validUser.ID {
+		noPermission := "no permission to fetch the user details"
+		respondWithError(w, http.StatusUnauthorized, noPermission, errors.New(noPermission))
 		return
 	}
 

@@ -100,6 +100,39 @@ const createVolunteer = `
 	  );
 	`
 
+const createParticipant = `
+	INSERT
+	OR IGNORE INTO users (
+	  id,
+	  first_name,
+	  last_name,
+	  password,
+	  email,
+	  phone,
+	  gender,
+	  nationality,
+	  role,
+	  retreat_id,
+	  check_in_date,
+	  leave_date
+	)
+	VALUES
+	  (
+		"00000000-0000-0000-0000-000000000002",
+		"Zak",
+		"Moore",
+		?,
+		"zak@mail.com",
+		"0987234987",
+		"Male",
+		"British",
+		"participant",
+		"0",
+		"",
+		""
+	  );
+	`
+
 func (c Client) createAdmin() error {
 	password, _ := auth.HashPassword("1234")
 	_, err := c.db.Exec(createAdmin, password)
@@ -109,6 +142,11 @@ func (c Client) createAdmin() error {
 	}
 
 	_, err = c.db.Exec(createVolunteer, password)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.db.Exec(createParticipant, password)
 	if err != nil {
 		return err
 	}

@@ -72,33 +72,33 @@ func main() {
 	mux.Handle("/assets/", noCacheMiddleware(assetsHandler))
 
 	// Roles Handlers
-	mux.HandleFunc("POST /api/roles", cfg.handlerRolesCreate)
-	mux.HandleFunc("GET /api/roles", cfg.handlerRolesGet)
-	mux.HandleFunc("GET /api/roles/{name}", cfg.handlerRolesGet)
-	mux.HandleFunc("PUT /api/roles/{name}", cfg.handlerRolesUpdate)
-	mux.HandleFunc("DELETE /api/roles/{name}", cfg.handlerRolesDelete)
+	mux.HandleFunc("POST /api/roles", cfg.checkRole(cfg.handlerRolesCreate))
+	mux.HandleFunc("GET /api/roles", cfg.checkRole(cfg.handlerRolesGet))
+	mux.HandleFunc("GET /api/roles/{name}", cfg.checkRole(cfg.handlerRolesGet))
+	mux.HandleFunc("PUT /api/roles/{name}", cfg.checkRole(cfg.handlerRolesUpdate))
+	mux.HandleFunc("DELETE /api/roles/{name}", cfg.checkRole(cfg.handlerRolesDelete))
 
 	// Users Handlers
-	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
-	mux.HandleFunc("GET /api/users/{searchValue}", cfg.handlerUsersGet)
-	mux.HandleFunc("GET /api/users", cfg.handlerUsersGet)
+	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate) // able to check in
+	mux.HandleFunc("GET /api/users/{searchValue}", cfg.handlerUserGet)
+	mux.HandleFunc("GET /api/users", cfg.checkRole(cfg.handlerUsersGet))
 	mux.HandleFunc("PUT /api/users/{searchValue}", cfg.handlerUsersUpdate)
 	mux.HandleFunc("PUT /api/users/password/{searchValue}", cfg.handlerUsersChangePassword)
-	mux.HandleFunc("DELETE /api/users/{userID}", cfg.handlerUsersDelete)
+	mux.HandleFunc("DELETE /api/users/{userID}", cfg.checkRole(cfg.handlerUsersDelete))
 
 	// Retreat Handlers
-	mux.HandleFunc("POST /api/retreats", cfg.handlerRetreatsCreate)
-	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.handlerRetreatsGet)
+	mux.HandleFunc("POST /api/retreats", cfg.checkRole(cfg.handlerRetreatsCreate))
+	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.checkRole(cfg.handlerRetreatsGet))
 	mux.HandleFunc("GET /api/retreats", cfg.handlerRetreatsGet)
-	mux.HandleFunc("PUT /api/retreats/{retreatID}", cfg.handlerRetreatUpdate)
-	mux.HandleFunc("DELETE /api/retreats/{retreatID}", cfg.handlerRetreatDelete)
+	mux.HandleFunc("PUT /api/retreats/{retreatID}", cfg.checkRole(cfg.handlerRetreatUpdate))
+	mux.HandleFunc("DELETE /api/retreats/{retreatID}", cfg.checkRole(cfg.handlerRetreatDelete))
 
 	// Place handlers
-	mux.HandleFunc("POST /api/places", cfg.handlerPlacesCreate)
-	mux.HandleFunc("GET /api/places/{name}", cfg.handlerPlacesGet)
+	mux.HandleFunc("POST /api/places", cfg.checkRole(cfg.handlerPlacesCreate))
+	mux.HandleFunc("GET /api/places/{name}", cfg.checkRole(cfg.handlerPlacesGet))
 	mux.HandleFunc("GET /api/places", cfg.handlerPlacesGet)
-	mux.HandleFunc("PUT /api/places/{name}", cfg.handlerPlacesUpdate)
-	mux.HandleFunc("DELETE /api/places/{name}", cfg.handlerPlacesDelete)
+	mux.HandleFunc("PUT /api/places/{name}", cfg.checkRole(cfg.handlerPlacesUpdate))
+	mux.HandleFunc("DELETE /api/places/{name}", cfg.checkRole(cfg.handlerPlacesDelete))
 
 	// Refresh Tokens
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)
@@ -108,7 +108,7 @@ func main() {
 	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
 
 	// QR codes
-	mux.HandleFunc("POST /api/qrcode", cfg.handlerQrcode)
+	mux.HandleFunc("POST /api/qrcode", cfg.checkRole(cfg.handlerQrcode))
 
 	log.Println("Server starting on port", port)
 	err = server.ListenAndServe()
