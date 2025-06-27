@@ -94,7 +94,7 @@ func main() {
 	mux.HandleFunc("DELETE /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatDelete))
 
 	// Place handlers
-	mux.HandleFunc("POST /api/places", (cfg.handlerPlacesCreate))
+	mux.HandleFunc("POST /api/places", cfg.JWTAuth(cfg.handlerPlacesCreate))
 	mux.HandleFunc("GET /api/places/{name}", cfg.JWTAuth(cfg.handlerPlaceGet))
 	mux.HandleFunc("GET /api/places", cfg.handlerPlacesGet)
 	mux.HandleFunc("PUT /api/places/{name}", cfg.JWTAuth(cfg.handlerPlacesUpdate))

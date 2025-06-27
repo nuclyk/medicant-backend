@@ -10,8 +10,14 @@ import (
 	"github.com/nuclyk/medicant/internal/database"
 )
 
-func (cfg Config) handlerPlacesCreate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerPlacesCreate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params database.Place
+
+	if !validUser.Editor {
+		err := errors.New("wrong user or role")
+		respondWithError(w, http.StatusUnauthorized, "wrong user or role", err)
+		return
+	}
 
 	decoder := json.NewDecoder(r.Body)
 
@@ -43,6 +49,12 @@ func (cfg Config) handlerPlacesGet(w http.ResponseWriter, r *http.Request) {
 func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	placeName := r.PathValue("name")
 
+	if !validUser.Editor {
+		err := errors.New("wrong user or role")
+		respondWithError(w, http.StatusUnauthorized, "wrong user or role", err)
+		return
+	}
+
 	if placeName != "" {
 		result, err := cfg.db.GetPlace(placeName)
 		if err != nil {
@@ -60,6 +72,12 @@ func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validU
 
 func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	placeName := r.PathValue("name")
+
+	if !validUser.Editor {
+		err := errors.New("wrong user or role")
+		respondWithError(w, http.StatusUnauthorized, "wrong user or role", err)
+		return
+	}
 
 	var params Place
 
@@ -103,6 +121,12 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 
 func (cfg Config) handlerPlacesDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	placeName := r.PathValue("name")
+
+	if !validUser.Editor {
+		err := errors.New("wrong user or role")
+		respondWithError(w, http.StatusUnauthorized, "wrong user or role", err)
+		return
+	}
 
 	type msg struct {
 		Msg string `json:"msg"`
