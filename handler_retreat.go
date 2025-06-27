@@ -18,19 +18,18 @@ type CreateRetreatParams struct {
 func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params CreateRetreatParams
 
+	if !validUser.Editor {
+		err := errors.New("wrong user or role")
+		respondWithError(w, http.StatusUnauthorized, "wrong user or role", err)
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "coldn't decode the request", err)
 		return
 	}
-
-	// Check if the start date of the retreat is not after the end date
-	// if params.Start_date.After(params.End_date) {
-	// 	err := fmt.Errorf("start date: %v after end date: %v", params.Start_date, params.End_date)
-	// 	respondWithError(w, http.StatusBadRequest, "couldn't start date can't later than the end date", err)
-	// 	return
-	// }
 
 	if params.Type != "fixed" && params.Type != "flexible" {
 		err := errors.New("type of the retreat is invalid")
@@ -64,6 +63,12 @@ func (cfg Config) handlerRetreatsGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg Config) handlerRetreatGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
+	if !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
+	}
+
 	retreatID := r.PathValue("retreatID")
 
 	if retreatID != "" {
@@ -83,8 +88,13 @@ func (cfg Config) handlerRetreatGet(w http.ResponseWriter, r *http.Request, vali
 }
 
 func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	retreatID := r.PathValue("retreatID")
+	if !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
+	}
 
+	retreatID := r.PathValue("retreatID")
 	var params CreateRetreatParams
 
 	decoder := json.NewDecoder(r.Body)
@@ -124,6 +134,12 @@ func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request, v
 }
 
 func (cfg Config) handlerRetreatDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
+	if !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
+	}
+
 	retreatID := r.PathValue("retreatID")
 
 	type msg struct {
