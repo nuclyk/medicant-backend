@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/nuclyk/medicant/internal/auth"
 	"github.com/nuclyk/medicant/internal/database"
 )
 
@@ -14,7 +15,7 @@ type CreateRetreatParams struct {
 	End_date   string `json:"end_date"`
 }
 
-func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params CreateRetreatParams
 
 	decoder := json.NewDecoder(r.Body)
@@ -52,6 +53,17 @@ func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request) 
 }
 
 func (cfg Config) handlerRetreatsGet(w http.ResponseWriter, r *http.Request) {
+	retreats, err := cfg.db.GetRetreats()
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, cfg.databaseRetreatsToRetreats(*retreats))
+}
+
+func (cfg Config) handlerRetreatGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	retreatID := r.PathValue("retreatID")
 
 	if retreatID != "" {
@@ -64,19 +76,13 @@ func (cfg Config) handlerRetreatsGet(w http.ResponseWriter, r *http.Request) {
 
 		respondWithJson(w, http.StatusOK, cfg.databaseRetreatToRetreat(retreat))
 	} else {
-		retreats, err := cfg.db.GetRetreats()
-
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
-			return
-		}
-
-		respondWithJson(w, http.StatusOK, cfg.databaseRetreatsToRetreats(*retreats))
+		respondWithError(w, http.StatusInternalServerError, "retreat id can't be empty", errors.New("retreat id can't be empty"))
+		return
 	}
 
 }
 
-func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	retreatID := r.PathValue("retreatID")
 
 	var params CreateRetreatParams
@@ -117,7 +123,7 @@ func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databaseRetreatToRetreat(&updatedRetreat))
 }
 
-func (cfg Config) handlerRetreatDelete(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRetreatDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	retreatID := r.PathValue("retreatID")
 
 	type msg struct {

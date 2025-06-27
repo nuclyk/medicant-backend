@@ -1,15 +1,14 @@
 package main
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/nuclyk/medicant/internal/auth"
 )
 
-type authedHandler func(http.ResponseWriter, *http.Request)
+type authedHandler func(http.ResponseWriter, *http.Request, auth.ValidUser)
 
-func (cfg Config) checkRole(handler authedHandler) http.HandlerFunc {
+func (cfg Config) JWTAuth(handler authedHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := auth.GetBearerToken(r.Header)
 		if err != nil {
@@ -23,13 +22,8 @@ func (cfg Config) checkRole(handler authedHandler) http.HandlerFunc {
 			return
 		}
 
-		validRole := validUser.Role == "admin" || validUser.Role == "volunteer"
-		if !validRole {
-			respondWithError(w, http.StatusNotFound, "Your role doesn't have a permission",
-				errors.New("role doesn't have permission"))
-			return
-		}
+		validUser.Permissions.Editor = validUser.Role == "admin" || validUser.Role == "volunteer"
 
-		handler(w, r)
+		handler(w, r, validUser)
 	}
 }

@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/nuclyk/medicant/internal/auth"
 	"github.com/nuclyk/medicant/internal/database"
 )
 
-func (cfg Config) handlerRolesCreate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRolesCreate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params database.Role
 
 	decoder := json.NewDecoder(r.Body)
@@ -27,7 +28,7 @@ func (cfg Config) handlerRolesCreate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databaseRoleToRole(role))
 }
 
-func (cfg Config) handlerRolesGet(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRolesGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	roleID := r.PathValue("name")
 
 	if roleID != "" {
@@ -51,7 +52,7 @@ func (cfg Config) handlerRolesGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (cfg Config) handlerRolesUpdate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRolesUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params database.Role
 	roleID := r.PathValue("name")
 
@@ -72,7 +73,7 @@ func (cfg Config) handlerRolesUpdate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databaseRoleToRole(role))
 }
 
-func (cfg Config) handlerRolesDelete(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerRolesDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	roleID := r.PathValue("name")
 
 	type msg struct {

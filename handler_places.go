@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/nuclyk/medicant/internal/auth"
 	"github.com/nuclyk/medicant/internal/database"
 )
 
@@ -29,30 +31,34 @@ func (cfg Config) handlerPlacesCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg Config) handlerPlacesGet(w http.ResponseWriter, r *http.Request) {
+	result, err := cfg.db.GetPlaces()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "getting all places failed", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, cfg.databasePlacesToPlaces(result))
+}
+
+func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	placeName := r.PathValue("name")
 
 	if placeName != "" {
 		result, err := cfg.db.GetPlace(placeName)
-
 		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("couldn't find: %s", placeName), err)
+			respondWithError(w, http.StatusNotFound, fmt.Sprintf("couldn't find: %s", placeName), err)
 			return
 		}
 
-		respondWithJson(w, http.StatusOK, cfg.databasePlaceToPlace(&result))
+		respondWithJson(w, http.StatusFound, cfg.databasePlaceToPlace(&result))
 	} else {
-		result, err := cfg.db.GetPlaces()
-
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "getting all places failed", err)
-			return
-		}
-
-		respondWithJson(w, http.StatusOK, cfg.databasePlacesToPlaces(result))
+		msg := "place name can't be empty"
+		respondWithError(w, http.StatusInternalServerError, msg, errors.New(msg))
+		return
 	}
 }
 
-func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	placeName := r.PathValue("name")
 
 	var params Place
@@ -95,7 +101,7 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databasePlaceToPlace(result))
 }
 
-func (cfg Config) handlerPlacesDelete(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerPlacesDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	placeName := r.PathValue("name")
 
 	type msg struct {

@@ -13,9 +13,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Permissions struct {
+	Owner  bool
+	Editor bool
+}
+
 type ValidUser struct {
 	ID   uuid.UUID
 	Role string
+	Permissions
 }
 
 type CustomClaims struct {

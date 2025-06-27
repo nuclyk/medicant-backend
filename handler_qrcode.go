@@ -3,10 +3,11 @@ package main
 import (
 	"net/http"
 
+	"github.com/nuclyk/medicant/internal/auth"
 	"github.com/skip2/go-qrcode"
 )
 
-func (cfg Config) handlerQrcode(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerQrcode(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	type response struct {
 		QrCheckin string `json:"qr_checkin"`
 	}
