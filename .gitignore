@@ -5,6 +5,5 @@ medicant
 build/
 .DS_Store
 out
-db/medicant.db
 tmp/
 .air.toml

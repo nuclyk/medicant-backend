@@ -62,9 +62,9 @@ func main() {
 	server := &http.Server{
 		Addr:         "0.0.0.0:" + port,
 		Handler:      enableCORS(mux),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	// Assets directory
