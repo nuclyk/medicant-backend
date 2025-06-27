@@ -13,6 +13,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Permissions struct {
+	Owner  bool
+	Editor bool
+}
+
+type ValidUser struct {
+	ID   uuid.UUID
+	Role string
+	Permissions
+}
+
+type CustomClaims struct {
+	Role string `json:"role"`
+	jwt.RegisteredClaims
+}
+
 type TokenType string
 
 const (
@@ -32,18 +48,23 @@ func CheckPasswordHash(hashedPassword string, password string) error {
 func MakeRefreshToken() (string, error) {
 	token := make([]byte, 32)
 	_, err := rand.Read(token)
+
 	if err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(token), nil
 }
 
 func GetBearerToken(headers http.Header) (string, error) {
 	authHeader := headers.Get("Authorization")
+
 	if authHeader == "" {
 		return "", ErrNoAuthHeaderIncluded
 	}
+
 	splitAuth := strings.Split(authHeader, " ")
+
 	if len(splitAuth) < 2 || splitAuth[0] != "Bearer" {
 		return "", errors.New("malformed authorization header")
 	}
@@ -53,11 +74,6 @@ func GetBearerToken(headers http.Header) (string, error) {
 
 func MakeJWT(userID uuid.UUID, role string, tokenSecret string, expires time.Duration) (string, error) {
 	signingKey := []byte(tokenSecret)
-
-	type CustomClaims struct {
-		Role string `json:"role"`
-		jwt.RegisteredClaims
-	}
 
 	claims := CustomClaims{
 		role,
@@ -70,37 +86,42 @@ func MakeJWT(userID uuid.UUID, role string, tokenSecret string, expires time.Dur
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	return token.SignedString(signingKey)
 }
 
-func Validate(tokenString, tokenSecret string) (uuid.UUID, error) {
-	claimsStruct := jwt.RegisteredClaims{}
+func Validate(tokenString, tokenSecret string) (ValidUser, error) {
+	claimsStruct := CustomClaims{}
+
 	token, err := jwt.ParseWithClaims(tokenString, &claimsStruct, func(t *jwt.Token) (any, error) {
 		return []byte(tokenSecret), nil
 	})
 
 	if err != nil {
-		return uuid.Nil, err
+		return ValidUser{}, err
 	}
 
 	userIDString, err := token.Claims.GetSubject()
+
 	if err != nil {
-		return uuid.Nil, err
+		return ValidUser{}, err
 	}
 
 	issuer, err := token.Claims.GetIssuer()
+
 	if err != nil {
-		return uuid.Nil, err
+		return ValidUser{}, err
 	}
 
 	if issuer != string(TokenTypeAccess) {
-		return uuid.Nil, errors.New("invalid issuer")
+		return ValidUser{}, errors.New("invalid issuer")
 	}
 
 	userID, err := uuid.Parse(userIDString)
+
 	if err != nil {
-		return uuid.Nil, errors.New("error when parsing uuid string")
+		return ValidUser{}, errors.New("error when parsing uuid string")
 	}
 
-	return userID, nil
+	return ValidUser{ID: userID, Role: claimsStruct.Role}, nil
 }

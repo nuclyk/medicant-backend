@@ -17,14 +17,17 @@ const createRole = `
 
 func (c Client) CreateRole(params Role) (*Role, error) {
 	c.log.Println("Creating new role")
+
 	_, err := c.db.Exec(createRole, params.Name)
+
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create new role: %v", err)
+		return nil, err
 	}
 
 	role, err := c.GetRole(params.Name)
+
 	if err != nil {
-		return nil, fmt.Errorf("couldn't get the new role: %v", err)
+		return nil, err
 	}
 
 	return role, nil
@@ -45,6 +48,7 @@ func (c Client) GetRole(name string) (*Role, error) {
 	var role Role
 
 	row := c.db.QueryRow(getRole, name)
+
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
@@ -67,8 +71,9 @@ func (c Client) GetRoles() ([]Role, error) {
 	c.log.Println("Getting all roles")
 
 	rows, err := c.db.Query(getRoles)
+
 	if err != nil {
-		return nil, fmt.Errorf("couldn't execute a query: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -77,16 +82,13 @@ func (c Client) GetRoles() ([]Role, error) {
 	for rows.Next() {
 		var role Role
 
-		err := rows.Scan(
-			&role.Name,
-		)
-
-		if err != nil {
-			return nil, fmt.Errorf("couldn't scan a row: %v", err)
+		if err := rows.Scan(&role.Name); err != nil {
+			return nil, err
 		}
 
 		roles = append(roles, role)
 	}
+
 	return roles, nil
 }
 
@@ -103,13 +105,14 @@ func (c Client) UpdateRole(id string, params Role) (*Role, error) {
 	c.log.Printf("Updating role: %s", id)
 
 	row := c.db.QueryRow(updateRole, params.Name, id)
+
 	if row.Err() != nil {
-		return nil, fmt.Errorf("couldn't update the role: %v", row.Err())
+		return nil, row.Err()
 	}
 
 	var role Role
-	err := row.Scan(&role.Name)
-	if err != nil {
+
+	if err := row.Scan(&role.Name); err != nil {
 		return nil, err
 	}
 
@@ -129,7 +132,7 @@ func (c Client) DeleteRole(name string) (string, error) {
 	_, err := c.db.Exec(deleteRole, name)
 
 	if err != nil {
-		return "", fmt.Errorf("couldn't update the role: %v", err)
+		return "", err
 	}
 
 	return fmt.Sprintf("Role with the id `%s` was deleted", name), nil

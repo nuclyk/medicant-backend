@@ -11,9 +11,9 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 GOOS=linux go build -o /usr/bin/medicant
+RUN CGO_ENABLED=1 GOOS=linux go build -o /app/medicant
 
 EXPOSE 8080
 
-CMD ["medicant"]
+CMD ["/app/medicant"]
 

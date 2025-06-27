@@ -32,6 +32,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	var params CreateUserParams
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error while decoding request body", err)
 		return
@@ -40,10 +41,28 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	// If password is provided then hash it
 	if params.Password != "" {
 		hashedPassword, err := auth.HashPassword(params.Password)
+
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "error while hashing the password", err)
+			return
 		}
+
 		params.Password = string(hashedPassword)
+	}
+
+	// Check if the user with this email already exists
+	users, err := cfg.db.GetUsers()
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
+		return
+	}
+
+	for _, user := range users {
+		if user.Email == params.Email {
+			respondWithError(w, http.StatusInternalServerError, "Email already exists.", errors.New("email not unique"))
+			return
+		}
 	}
 
 	user, err := cfg.db.CreateUser(database.CreateUserParams{
@@ -72,59 +91,57 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 }
 
-func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
-	searchValue := r.PathValue("searchValue")
+func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
+	userID := r.PathValue("userID")
 
-	token, err := auth.GetBearerToken(r.Header)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error(), err)
+	if userID == "" {
+		respondWithError(w, http.StatusInternalServerError, "search value can't be empty",
+			errors.New("empty search value"))
 		return
 	}
 
-	_, err = auth.Validate(token, cfg.tokenSecret)
+	user, err := cfg.db.GetUser(userID)
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "unauthorized", err)
+		respondWithError(w, http.StatusInternalServerError, "couldn't get user", err)
 		return
 	}
 
-	if searchValue != "" {
-		user, err := cfg.db.GetUser(searchValue)
+	validUser.Owner = user.ID == validUser.ID
 
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "couldn't get user", err)
-			return
-		}
-
-		respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
-
-	} else {
-		users, err := cfg.db.GetUsers()
-
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
-			return
-		}
-
-		respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
+	if !validUser.Owner && !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
 	}
+
+	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 }
 
-func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
+	users, err := cfg.db.GetUsers()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
+}
+
+func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params database.UpdatePasswordParams
-	searchValue := r.PathValue("searchValue")
+	userID := r.PathValue("userID")
 
 	type msg struct {
 		Msg string `json:"msg"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
-	if err != nil {
+	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, http.StatusBadRequest, "couldn't decode the request body", err)
 		return
 	}
 
-	if searchValue == "" {
+	if userID == "" {
 		respondWithError(w, http.StatusBadRequest, "provide valid search value", fmt.Errorf("invalid user id"))
 		return
 	}
@@ -135,7 +152,7 @@ func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	result, err := cfg.db.UpdatePassword(searchValue, params)
+	result, err := cfg.db.UpdatePassword(userID, params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, result, err)
 		return
@@ -144,11 +161,11 @@ func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Requ
 	respondWithJson(w, http.StatusOK, msg{Msg: result})
 }
 
-func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	var params CreateUserParams
-	searchValue := r.PathValue("searchValue")
+	userID := r.PathValue("userID")
 
-	if searchValue == "" {
+	if userID == "" {
 		respondWithError(w, http.StatusBadRequest, "provide valid id or email", fmt.Errorf("invalid id or email"))
 		return
 	}
@@ -160,12 +177,22 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := cfg.db.GetUser(searchValue)
+	user, err := cfg.db.GetUser(userID)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't fetch a user", err)
 		return
 	}
 
+	validUser.Owner = user.ID == validUser.ID
+
+	if !validUser.Owner && !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
+	}
+
+	// admin or volunteer can fetch any use
 	if params.FirstName != "" {
 		user.FirstName = params.FirstName
 	}
@@ -222,7 +249,8 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 		user.Place = params.Place
 	}
 
-	user, err = cfg.db.UpdateUser(searchValue, user)
+	user, err = cfg.db.UpdateUser(userID, user)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't update the user", err)
 		return
@@ -231,11 +259,17 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 }
 
-func (cfg Config) handlerUsersDelete(w http.ResponseWriter, r *http.Request) {
+func (cfg Config) handlerUsersDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	userID := r.PathValue("userID")
 
 	type msg struct {
 		Msg string `json:"msg"`
+	}
+
+	if !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
 	}
 
 	successMsg, err := cfg.db.DeleteUser(userID)

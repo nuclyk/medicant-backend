@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 
@@ -18,21 +19,6 @@ type Config struct {
 
 var cfg Config
 
-func enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -42,6 +28,11 @@ func main() {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
 		log.Fatal("Database url has to be set in .env")
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT has not been set")
 	}
 
 	secret := os.Getenv("SECRET")
@@ -68,39 +59,46 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:         "0.0.0.0:" + port,
+		Handler:      enableCORS(mux),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
 
 	// Assets directory
 	assetsHandler := http.StripPrefix("/assets", http.FileServer(http.Dir(assets)))
 	mux.Handle("/assets/", noCacheMiddleware(assetsHandler))
 
 	// Roles Handlers
-	mux.HandleFunc("POST /api/roles", cfg.handlerRolesCreate)
-	mux.HandleFunc("GET /api/roles", cfg.handlerRolesGet)
-	mux.HandleFunc("GET /api/roles/{name}", cfg.handlerRolesGet)
-	mux.HandleFunc("PUT /api/roles/{name}", cfg.handlerRolesUpdate)
-	mux.HandleFunc("DELETE /api/roles/{name}", cfg.handlerRolesDelete)
+	mux.HandleFunc("POST /api/roles", cfg.JWTAuth(cfg.handlerRolesCreate))
+	mux.HandleFunc("GET /api/roles", cfg.JWTAuth(cfg.handlerRolesGet))
+	mux.HandleFunc("GET /api/roles/{name}", cfg.JWTAuth(cfg.handlerRolesGet))
+	mux.HandleFunc("PUT /api/roles/{name}", cfg.JWTAuth(cfg.handlerRolesUpdate))
+	mux.HandleFunc("DELETE /api/roles/{name}", cfg.JWTAuth(cfg.handlerRolesDelete))
 
 	// Users Handlers
 	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
-	mux.HandleFunc("GET /api/users/{searchValue}", cfg.handlerUsersGet)
-	mux.HandleFunc("GET /api/users", cfg.handlerUsersGet)
-	mux.HandleFunc("PUT /api/users/{searchValue}", cfg.handlerUsersUpdate)
-	mux.HandleFunc("PUT /api/users/password/{searchValue}", cfg.handlerUsersChangePassword)
-	mux.HandleFunc("DELETE /api/users/{userID}", cfg.handlerUsersDelete)
+	mux.HandleFunc("GET /api/users/{userID}", cfg.JWTAuth(cfg.handlerUserGet))
+	mux.HandleFunc("GET /api/users", cfg.JWTAuth(cfg.handlerUsersGet))
+	mux.HandleFunc("PUT /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersUpdate))
+	mux.HandleFunc("PUT /api/users/password/{userID}", cfg.JWTAuth(cfg.handlerUsersChangePassword))
+	mux.HandleFunc("DELETE /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersDelete))
 
 	// Retreat Handlers
-	mux.HandleFunc("POST /api/retreats", cfg.handlerRetreatsCreate)
-	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.handlerRetreatsGet)
+	mux.HandleFunc("POST /api/retreats", cfg.JWTAuth(cfg.handlerRetreatsCreate))
+	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatGet))
 	mux.HandleFunc("GET /api/retreats", cfg.handlerRetreatsGet)
-	mux.HandleFunc("PUT /api/retreats/{retreatID}", cfg.handlerRetreatUpdate)
-	mux.HandleFunc("DELETE /api/retreats/{retreatID}", cfg.handlerRetreatDelete)
+	mux.HandleFunc("PUT /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatUpdate))
+	mux.HandleFunc("DELETE /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatDelete))
 
 	// Place handlers
-	mux.HandleFunc("POST /api/places", cfg.handlerPlacesCreate)
-	mux.HandleFunc("GET /api/places/{name}", cfg.handlerPlacesGet)
+	mux.HandleFunc("POST /api/places", cfg.JWTAuth(cfg.handlerPlacesCreate))
+	mux.HandleFunc("GET /api/places/{name}", cfg.JWTAuth(cfg.handlerPlaceGet))
 	mux.HandleFunc("GET /api/places", cfg.handlerPlacesGet)
-	mux.HandleFunc("PUT /api/places/{name}", cfg.handlerPlacesUpdate)
-	mux.HandleFunc("DELETE /api/places/{name}", cfg.handlerPlacesDelete)
+	mux.HandleFunc("PUT /api/places/{name}", cfg.JWTAuth(cfg.handlerPlacesUpdate))
+	mux.HandleFunc("DELETE /api/places/{name}", cfg.JWTAuth(cfg.handlerPlacesDelete))
 
 	// Refresh Tokens
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)
@@ -110,7 +108,26 @@ func main() {
 	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
 
 	// QR codes
-	mux.HandleFunc("POST /api/qrcode", cfg.handlerQrcode)
+	mux.HandleFunc("POST /api/qrcode", cfg.JWTAuth(cfg.handlerQrcode))
 
-	log.Fatal(http.ListenAndServe(":8080", enableCORS(mux))) // #nosec G114
+	log.Println("Server starting on port", port)
+	err = server.ListenAndServe()
+	if err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
+}
+
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

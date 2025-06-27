@@ -28,27 +28,31 @@ func (cfg Config) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	err := decoder.Decode(&req)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "logging in: couldn't decode request body", err)
+	if err := decoder.Decode(&req); err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't decode request body", err)
 		return
 	}
 
 	user, err := cfg.db.GetUser(req.Email)
+
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "logging in: couldn't find a user", err)
+		respondWithError(w, http.StatusInternalServerError, "can't find user", err)
 		return
 	}
 
 	cfg.log.Println("Making JWT")
+
 	jwt, err := auth.MakeJWT(user.ID, user.Role, cfg.tokenSecret, time.Hour)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't make jwt", err)
 		return
 	}
 
 	cfg.log.Println("Create refresh token")
+
 	rt, err := auth.MakeRefreshToken()
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error when creating refresh token", err)
 		return
@@ -66,6 +70,7 @@ func (cfg Config) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cfg.log.Println("Checking password")
+
 	valid := auth.CheckPasswordHash(user.Password, req.Password)
 
 	if valid == nil {
