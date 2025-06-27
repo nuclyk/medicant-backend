@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/nuclyk/medicant/internal/auth"
@@ -18,6 +19,12 @@ func (cfg Config) handlerRolesCreate(w http.ResponseWriter, r *http.Request, val
 		return
 	}
 
+	if validUser.Role != "admin" {
+		respondWithError(w, http.StatusUnauthorized, "You have to be an admin",
+			errors.New("not an admin"))
+		return
+	}
+
 	role, err := cfg.db.CreateRole(params)
 
 	if err != nil {
@@ -30,6 +37,12 @@ func (cfg Config) handlerRolesCreate(w http.ResponseWriter, r *http.Request, val
 
 func (cfg Config) handlerRolesGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	roleID := r.PathValue("name")
+
+	if !validUser.Editor {
+		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+			errors.New("wrong user or role"))
+		return
+	}
 
 	if roleID != "" {
 		role, err := cfg.db.GetRole(roleID)
@@ -63,6 +76,12 @@ func (cfg Config) handlerRolesUpdate(w http.ResponseWriter, r *http.Request, val
 		return
 	}
 
+	if validUser.Role != "admin" {
+		respondWithError(w, http.StatusUnauthorized, "You have to be an admin",
+			errors.New("not an admin"))
+		return
+	}
+
 	role, err := cfg.db.UpdateRole(roleID, params)
 
 	if err != nil {
@@ -78,6 +97,12 @@ func (cfg Config) handlerRolesDelete(w http.ResponseWriter, r *http.Request, val
 
 	type msg struct {
 		Msg string `json:"msg"`
+	}
+
+	if validUser.Role != "admin" {
+		respondWithError(w, http.StatusUnauthorized, "You have to be an admin",
+			errors.New("not an admin"))
+		return
 	}
 
 	successMsg, err := cfg.db.DeleteRole(roleID)
