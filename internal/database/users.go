@@ -30,7 +30,6 @@ type CreateUserParams struct {
 	CheckInDate  string
 	CheckOutDate *string
 	LeaveDate    string
-	IsCheckedIn  *bool
 	Diet         *string
 	Place        string
 }
@@ -55,12 +54,11 @@ const createUser = `
 		retreat_id,
 		check_out_date,
 		leave_date,
-		is_checked_in,
 		diet,
 		place
 	  )
 	VALUES
-	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `
 
 func (c Client) CreateUser(params CreateUserParams) (*User, error) {
@@ -82,7 +80,6 @@ func (c Client) CreateUser(params CreateUserParams) (*User, error) {
 		params.RetreatID,
 		params.CheckOutDate,
 		params.LeaveDate,
-		params.IsCheckedIn,
 		params.Diet,
 		params.Place,
 	)
@@ -118,14 +115,13 @@ const getUser = `
       check_in_date,
       check_out_date,
       leave_date,
-      is_checked_in,
 	  diet,
 	  place
     FROM
       users
     WHERE
-      id = :search_value
-      OR email = :search_value;
+	id = :search_value
+	OR email = :search_value
     `
 
 func (c Client) GetUser(searchValue string) (*User, error) {
@@ -152,7 +148,6 @@ func (c Client) GetUser(searchValue string) (*User, error) {
 		&user.CheckInDate,
 		&user.CheckOutDate,
 		&user.LeaveDate,
-		&user.IsCheckedIn,
 		&user.Diet,
 		&user.Place,
 	); err != nil {
@@ -183,7 +178,6 @@ const getUsers = `
       check_in_date,
 	  check_out_date,
 	  leave_date,
-      is_checked_in,
 	  diet,
 	  place
     FROM
@@ -221,7 +215,6 @@ func (c Client) GetUsers() ([]User, error) {
 			&user.CheckInDate,
 			&user.CheckOutDate,
 			&user.LeaveDate,
-			&user.IsCheckedIn,
 			&user.Diet,
 			&user.Place,
 		); err != nil {
@@ -288,18 +281,17 @@ const updatePassword = `
     SET
       password = ?
     WHERE
-      id = :search_value
-      OR email = :search_value;
+      id = ?
     `
 
-func (c Client) UpdatePassword(searchValue string, password UpdatePasswordParams) (string, error) {
+func (c Client) UpdatePassword(id string, password UpdatePasswordParams) (string, error) {
 	hashedPassword, err := auth.HashPassword(password.Password)
 
 	if err != nil {
 		return "failed to hash the password", err
 	}
 
-	_, err = c.db.Exec(updatePassword, hashedPassword, sql.Named("searchValue", searchValue))
+	_, err = c.db.Exec(updatePassword, hashedPassword, id)
 
 	if err != nil {
 		return "password change failed", err
@@ -325,7 +317,6 @@ const updateUser = `
       check_in_date = ?,
       check_out_date = ?,
       leave_date = ?,
-      is_checked_in = ?,
       diet = ?,
       place = ?
     WHERE
@@ -346,7 +337,6 @@ const updateUser = `
       check_in_date,
       check_out_date,
       leave_date,
-      is_checked_in,
 	  diet,
 	  place;
     `
@@ -368,7 +358,6 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		params.CheckInDate,
 		params.CheckOutDate,
 		params.LeaveDate,
-		params.IsCheckedIn,
 		params.Diet,
 		params.Place,
 		id,
@@ -396,7 +385,6 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		&user.CheckInDate,
 		&user.CheckOutDate,
 		&user.LeaveDate,
-		&user.IsCheckedIn,
 		&user.Diet,
 		&user.Place,
 	); err != nil {

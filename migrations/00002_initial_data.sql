@@ -20,9 +20,13 @@ VALUES
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin
-DELETE from places;
+DELETE from refresh_tokens;
+
+DELETE from users;
 
 DELETE from roles;
+
+DELETE from places;
 
 DELETE from retreats;
 

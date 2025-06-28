@@ -17,10 +17,9 @@ CREATE TABLE IF NOT EXISTS users (
   check_in_date TEXT DEFAULT (datetime ('now', 'localtime')),
   check_out_date TEXT,
   leave_date TEXT NOT NULL,
-  is_checked_in BOOL NOT NULL DEFAULT 1,
   diet TEXT,
   place TEXT NOT NULL DEFAULT 'None',
-  FOREIGN KEY (role) REFERENCES roles (name) ON UPDATE CASCADE,
+  FOREIGN KEY (role) REFERENCES roles (name) ON UPDATE CASCADE ON DELETE SET DEFAULT,
   FOREIGN KEY (retreat_id) REFERENCES retreats (id) ON UPDATE CASCADE ON DELETE SET DEFAULT,
   FOREIGN KEY (place) REFERENCES places (name) ON UPDATE CASCADE ON DELETE SET DEFAULT
 );
@@ -47,7 +46,10 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS places (name TEXT PRIMARY KEY, capacity INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS places (
+  name TEXT PRIMARY KEY,
+  capacity INTEGER NOT NULL DEFAULT 0
+);
 
 PRAGMA foreign_keys = ON;
 

@@ -73,7 +73,6 @@ type User struct {
 	CheckInDate  string    `json:"check_in_date"`
 	CheckOutDate string    `json:"check_out_date"`
 	LeaveDate    string    `json:"leave_date"`
-	IsCheckedIn  *bool     `json:"is_checked_in"`
 	Diet         string    `json:"diet"`
 	Place        string    `json:"place"`
 }
@@ -106,7 +105,6 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		CheckInDate:  user.CheckInDate,
 		CheckOutDate: date,
 		LeaveDate:    user.LeaveDate,
-		IsCheckedIn:  user.IsCheckedIn,
 		Diet:         diet,
 		Place:        user.Place,
 	}
@@ -143,7 +141,6 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			CheckInDate:  user.CheckInDate,
 			CheckOutDate: date,
 			LeaveDate:    user.LeaveDate,
-			IsCheckedIn:  user.IsCheckedIn,
 			Diet:         diet,
 			Place:        user.Place,
 		})

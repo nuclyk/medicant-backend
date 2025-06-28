@@ -23,7 +23,6 @@ type CreateUserParams struct {
 	RetreatID    int     `json:"retreat_id,omitempty"`
 	CheckOutDate *string `json:"check_out_date,omitempty"`
 	LeaveDate    string  `json:"leave_date,omitempty"`
-	IsCheckedIn  *bool   `json:"is_checked_in,omitempty"`
 	Diet         *string `json:"diet,omitempty"`
 	Place        string  `json:"place,omitempty"`
 }
@@ -78,7 +77,6 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		RetreatID:    params.RetreatID,
 		CheckOutDate: params.CheckOutDate,
 		LeaveDate:    params.LeaveDate,
-		IsCheckedIn:  params.IsCheckedIn,
 		Diet:         params.Diet,
 		Place:        params.Place,
 	})
@@ -114,7 +112,7 @@ func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUs
 		return
 	}
 
-	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
+	respondWithJson(w, http.StatusFound, cfg.databaseUserToUser(user))
 }
 
 func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
@@ -235,10 +233,6 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 
 	if params.LeaveDate != "" {
 		user.LeaveDate = params.LeaveDate
-	}
-
-	if params.IsCheckedIn != nil {
-		user.IsCheckedIn = params.IsCheckedIn
 	}
 
 	if params.Diet != nil {
