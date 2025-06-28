@@ -30,11 +30,6 @@ func main() {
 		log.Println("Turso database url has to be set in .env")
 	}
 
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		log.Println("Database url has to be set in .env")
-	}
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Println("PORT has not been set")
@@ -50,6 +45,7 @@ func main() {
 		log.Println("Assets root has to be set")
 	}
 
+	// Create new DB
 	dbClient, err := database.NewClient(tursoURL)
 	if err != nil {
 		log.Fatalf("couldn't create new database client: %v", err)
@@ -65,10 +61,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	server := &http.Server{
-		Addr:         "0.0.0.0:8080",
+		Addr:         "0.0.0.0:" + port,
 		Handler:      enableCORS(mux),
-		ReadTimeout:  60 * time.Second,
-		WriteTimeout: 60 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 

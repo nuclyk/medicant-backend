@@ -1,46 +1,31 @@
 .vscode
 
-# Git
 .git
 .gitignore
-
 .air.toml
 
-# Documentation
 README.md
 LICENSE
 docs/
 
-# Go specific
-go.sum
-*.mod
 vendor/
+*.mod
+*.sum
 
-# Test files
 *_test.go
 testdata/
 coverage.out
 
-# Build artifacts
 bin/
 *.exe
 
-# IDE
 .vscode/
 .idea/
 
-# OS
 .DS_Store
 Thumbs.db
 
-# Docker
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# Environment
 .env*
 
-# CI/CD
 .github/
 Makefile
