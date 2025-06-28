@@ -1,16 +1,12 @@
 # build stage
-FROM golang:1.24.4-bookworm AS build
+FROM --platform=linux/amd64 debian:stable-slim
 
-WORKDIR /app
-
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-
-RUN CGO_ENABLED=1 GOOS=linux go build -o /app/medicant
+RUN apt-get update && apt-get install -y ca-certificates
 
 EXPOSE 8080
 
-CMD ["/app/medicant"]
+ADD medicant /usr/bin/medicant
+
+CMD ["medicant"]
+
 
