@@ -6,8 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/nuclyk/medicant/internal/auth"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
+
+	"github.com/nuclyk/medicant/internal/auth"
 )
 
 type Client struct {
@@ -25,7 +26,6 @@ func NewClient(url string) (Client, error) {
 		fmt.Fprintf(os.Stderr, "failed to open db %s", err)
 		os.Exit(1)
 	}
-	defer db.Close()
 
 	if err != nil {
 		return Client{}, err

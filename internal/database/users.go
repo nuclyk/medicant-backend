@@ -329,8 +329,7 @@ const updateUser = `
       diet = ?,
       place = ?
     WHERE
-	email = :search_value
-	OR id = :search_value
+	id = ?
     RETURNING 
       id,
       created_at,
@@ -352,7 +351,7 @@ const updateUser = `
 	  place;
     `
 
-func (c Client) UpdateUser(searchValue string, params *User) (*User, error) {
+func (c Client) UpdateUser(id string, params *User) (*User, error) {
 	c.log.Println("Updating user")
 
 	row := c.db.QueryRow(
@@ -372,7 +371,7 @@ func (c Client) UpdateUser(searchValue string, params *User) (*User, error) {
 		params.IsCheckedIn,
 		params.Diet,
 		params.Place,
-		sql.Named("search_value", searchValue),
+		id,
 	)
 
 	if row.Err() != nil {
