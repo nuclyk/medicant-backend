@@ -1,3 +1,5 @@
+*.db
+
 # Binaries for programs and plugins
 medicant
 *.exe

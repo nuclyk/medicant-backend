@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	_ "github.com/tursodatabase/go-libsql"
 
 	"github.com/nuclyk/medicant/internal/auth"
 )
@@ -33,9 +33,9 @@ func NewClient(url string) (Client, error) {
 
 	c := Client{db, dbLog}
 
-	if err = c.createAdmin(); err != nil {
-		return Client{}, err
-	}
+	// if err = c.createAdmin(); err != nil {
+	// 	return Client{}, err
+	// }
 
 	return c, nil
 }
