@@ -42,7 +42,7 @@ func (cfg Config) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	cfg.log.Println("Making JWT")
 
-	jwt, err := auth.MakeJWT(user.ID, user.Role, cfg.tokenSecret, time.Hour)
+	jwt, err := auth.MakeJWT(user.ID, user.Role, cfg.tokenSecret, 15*time.Minute)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't make jwt", err)
