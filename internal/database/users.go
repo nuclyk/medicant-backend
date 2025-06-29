@@ -311,7 +311,7 @@ const updateUser = `
     UPDATE
       users
     SET
-      updated_at = datetime('now', 'localtime'),
+      updated_at = datetime('now', '+7 hours'),
       first_name = ?,
       last_name = ?,
       email = ?,

@@ -2,8 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  created_at TEXT DEFAULT (datetime ('now', 'localtime')),
-  updated_at TEXT DEFAULT (datetime ('now', 'localtime')),
+  created_at TEXT DEFAULT (datetime ('now', '+7 hours')),
+  updated_at TEXT DEFAULT (datetime ('now', '+7 hours')),
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   password TEXT NOT NULL DEFAULT '',
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   nationality TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'participant',
   retreat_id INTEGER NOT NULL DEFAULT 0,
-  check_in_date TEXT DEFAULT (datetime ('now', 'localtime')),
+  check_in_date TEXT DEFAULT (datetime ('now', '+7 hours')),
   check_out_date TEXT,
   leave_date TEXT NOT NULL,
   diet TEXT,
@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS retreats (
   id INTEGER PRIMARY KEY,
   retreat_code TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime ('now', 'localtime')),
-  updated_at TEXT DEFAULT (datetime ('now', 'localtime')),
+  created_at TEXT DEFAULT (datetime ('now', '+7 hours')),
+  updated_at TEXT DEFAULT (datetime ('now', '+7 hours')),
   type TEXT NOT NULL CHECK (type IN ('fixed', 'flexible')),
   start_date TEXT "",
   end_date TEXT
@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS roles (name TEXT PRIMARY KEY);
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   token TEXT PRIMARY KEY,
-  created_at TEXT DEFAULT (datetime ('now', 'localtime')),
-  updated_at TEXT DEFAULT (datetime ('now', 'localtime')),
+  created_at TEXT DEFAULT (datetime ('now', '+7 hours')),
+  updated_at TEXT DEFAULT (datetime ('now', '+7 hours')),
   revoked_at TEXT,
   user_id TEXT NOT NULL,
   expires_at TEXT NOT NULL,

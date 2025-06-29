@@ -83,7 +83,7 @@ func (c Client) GetRefreshToken(token string) (RefreshToken, error) {
 const revokeToken = `
 	UPDATE refresh_tokens
 	SET
-	  revoked_at = datetime ('now', 'localtime')
+	  revoked_at = datetime ('now', '+7 hours')
 	WHERE
 	  token = ?;
     ` // #nosec G101
