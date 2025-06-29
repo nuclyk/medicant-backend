@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/nuclyk/medicant/internal/auth"
@@ -157,6 +158,36 @@ func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	respondWithJson(w, http.StatusOK, msg{Msg: result})
+}
+
+func (cfg Config) handlerUserCheckout(w http.ResponseWriter, r *http.Request) {
+	cfg.log.Println("user checkout")
+
+	type params struct {
+		Email string `json:"email"`
+	}
+
+	type msg struct {
+		Success bool `json:"success"`
+	}
+
+	var user params
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&user); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error while decoding", err)
+		return
+	}
+
+	log.Println(user.Email)
+
+	err := cfg.db.CheckoutUser(user.Email)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "error when checking out the user", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, msg{Success: true})
 }
 
 func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {

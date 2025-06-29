@@ -300,6 +300,13 @@ func (c Client) UpdatePassword(id string, password UpdatePasswordParams) (string
 	return "password change successful", nil
 }
 
+const checkoutUser = `UPDATE users SET check_out_date = datetime('now', '+7 hours') WHERE email = ?;`
+
+func (c Client) CheckoutUser(email string) error {
+	_, err := c.db.Exec(checkoutUser, email)
+	return err
+}
+
 const updateUser = `
     UPDATE
       users

@@ -87,6 +87,9 @@ func main() {
 	mux.HandleFunc("PUT /api/users/password/{userID}", cfg.JWTAuth(cfg.handlerUsersChangePassword))
 	mux.HandleFunc("DELETE /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersDelete))
 
+	// Checkout
+	mux.HandleFunc("PUT /api/users", cfg.handlerUserCheckout)
+
 	// Retreat Handlers
 	mux.HandleFunc("POST /api/retreats", cfg.JWTAuth(cfg.handlerRetreatsCreate))
 	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatGet))
