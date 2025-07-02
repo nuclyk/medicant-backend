@@ -25,9 +25,14 @@ func main() {
 		log.Printf("Error loading .env file: %v", err)
 	}
 
-	tursoURL := os.Getenv("TURSO_DATABASE_URL")
-	if tursoURL == "" {
+	tursoRemote := os.Getenv("TURSO_DATABASE_URL")
+	if tursoRemote == "" {
 		log.Println("Turso database url has to be set in .env")
+	}
+
+	tursoLocal := os.Getenv("TURSO_LOCAL")
+	if tursoLocal == "" {
+		log.Println("Turso local database url has to be set in .env")
 	}
 
 	port := os.Getenv("PORT")
@@ -45,8 +50,16 @@ func main() {
 		log.Println("Assets root has to be set")
 	}
 
+	var dbURL string
+	if len(os.Args) > 1 && os.Args[1] == "dev" {
+		log.Print("Running in dev mode")
+		dbURL = tursoLocal
+	} else {
+		dbURL = tursoRemote
+	}
+
 	// Create new DB
-	dbClient, err := database.NewClient(tursoURL)
+	dbClient, err := database.NewClient(dbURL)
 	if err != nil {
 		log.Fatalf("couldn't create new database client: %v", err)
 	}
