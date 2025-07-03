@@ -161,6 +161,26 @@ func (c Client) GetUser(searchValue string) (*User, error) {
 	return &user, nil
 }
 
+const userExists = `SELECT id FROM users WHERE email = ?;`
+
+func (c Client) CheckForUser(email string) (string, error) {
+	c.log.Printf("Checking if the user with email: %s exists", email)
+
+	row := c.db.QueryRow(userExists, email)
+
+	var id string
+
+	if err := row.Scan(&id); err != nil {
+		return "", err
+	}
+
+	if err := row.Err(); err != nil {
+		return "", err
+	}
+
+	return id, nil
+}
+
 const getUsers = ` 
     SELECT
       id,

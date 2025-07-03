@@ -2,4 +2,3 @@
 
 go build .
 ./medicant dev
-

@@ -30,6 +30,11 @@ func main() {
 		log.Println("Turso database url has to be set in .env")
 	}
 
+	tursoDev := os.Getenv("TURSO_DEV")
+	if tursoDev == "" {
+		log.Println("Turso database url has to be set in .env")
+	}
+
 	tursoLocal := os.Getenv("TURSO_LOCAL")
 	if tursoLocal == "" {
 		log.Println("Turso local database url has to be set in .env")
@@ -99,6 +104,8 @@ func main() {
 	mux.HandleFunc("PUT /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersUpdate))
 	mux.HandleFunc("PUT /api/users/password/{userID}", cfg.JWTAuth(cfg.handlerUsersChangePassword))
 	mux.HandleFunc("DELETE /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersDelete))
+
+	mux.HandleFunc("POST /api/users/exists", cfg.handlerCheckForUser)
 
 	// Checkout
 	mux.HandleFunc("PUT /api/users", cfg.handlerUserCheckout)
