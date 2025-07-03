@@ -6,8 +6,10 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	_ "github.com/tursodatabase/go-libsql"
 )
+
+//_ "github.com/tursodatabase/libsql-client-go/libsql"
 
 type Client struct {
 	db  *sql.DB

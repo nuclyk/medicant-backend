@@ -30,6 +30,11 @@ func main() {
 		log.Println("Turso database url has to be set in .env")
 	}
 
+	tursoDev := os.Getenv("TURSO_DEV")
+	if tursoDev == "" {
+		log.Println("Turso database url has to be set in .env")
+	}
+
 	tursoLocal := os.Getenv("TURSO_LOCAL")
 	if tursoLocal == "" {
 		log.Println("Turso local database url has to be set in .env")
