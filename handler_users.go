@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/nuclyk/medicant/internal/auth"
 	"github.com/nuclyk/medicant/internal/database"
@@ -131,7 +132,8 @@ func (cfg Config) handlerCheckForUser(w http.ResponseWriter, r *http.Request) {
 		Value string `json:"email"`
 	}
 
-	type userID struct {
+	type Response struct {
+		Token  string `json:"token"`
 		UserID string `json:"userID"`
 	}
 
@@ -143,13 +145,19 @@ func (cfg Config) handlerCheckForUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := cfg.db.CheckForUser(email.Value)
+	user, err := cfg.db.GetUser(email.Value)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "User nof found", err)
 		return
 	}
 
-	respondWithJson(w, http.StatusFound, userID{id})
+	token, err := auth.MakeJWT(user.ID, user.Role, cfg.tokenSecret, time.Minute)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Token could not be generated", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, Response{token, user.ID.String()})
 }
 
 func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
