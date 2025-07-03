@@ -23,6 +23,7 @@ type CreateUserParams struct {
 	Nationality  string  `json:"nationality,omitempty"`
 	Role         string  `json:"role,omitempty"`
 	RetreatID    int     `json:"retreat_id,omitempty"`
+	CheckInDate  string  `json:"check_in_date,omitempty"`
 	CheckOutDate *string `json:"check_out_date,omitempty"`
 	LeaveDate    string  `json:"leave_date,omitempty"`
 	Diet         *string `json:"diet,omitempty"`
@@ -77,6 +78,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		Nationality:  params.Nationality,
 		Role:         params.Role,
 		RetreatID:    params.RetreatID,
+		CheckInDate:  params.CheckInDate,
 		CheckOutDate: params.CheckOutDate,
 		LeaveDate:    params.LeaveDate,
 		Diet:         params.Diet,
@@ -290,6 +292,10 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 
 	if params.RetreatID != 0 {
 		user.RetreatID = params.RetreatID
+	}
+
+	if params.CheckInDate != "" {
+		user.CheckInDate = params.CheckInDate
 	}
 
 	if params.CheckOutDate != nil {
