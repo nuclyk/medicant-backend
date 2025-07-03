@@ -58,7 +58,7 @@ func main() {
 	var dbURL string
 	if len(os.Args) > 1 && os.Args[1] == "dev" {
 		log.Print("Running in dev mode")
-		dbURL = tursoLocal
+		dbURL = tursoDev
 	} else {
 		dbURL = tursoRemote
 	}
