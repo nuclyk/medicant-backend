@@ -105,6 +105,8 @@ func main() {
 	mux.HandleFunc("PUT /api/users/password/{userID}", cfg.JWTAuth(cfg.handlerUsersChangePassword))
 	mux.HandleFunc("DELETE /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersDelete))
 
+	mux.HandleFunc("POST /api/users/exists", cfg.handlerCheckForUser)
+
 	// Checkout
 	mux.HandleFunc("PUT /api/users", cfg.handlerUserCheckout)
 

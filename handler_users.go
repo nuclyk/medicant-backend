@@ -119,11 +119,37 @@ func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUs
 func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
 	users, err := cfg.db.GetUsers()
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't get users", err)
 		return
 	}
 
 	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
+}
+
+func (cfg Config) handlerCheckForUser(w http.ResponseWriter, r *http.Request) {
+	type Email struct {
+		Value string `json:"email"`
+	}
+
+	type userID struct {
+		UserID string `json:"userID"`
+	}
+
+	var email Email
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&email); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not decode the request", err)
+		return
+	}
+
+	id, err := cfg.db.CheckForUser(email.Value)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "User nof found", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusFound, userID{id})
 }
 
 func (cfg Config) handlerUsersChangePassword(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
