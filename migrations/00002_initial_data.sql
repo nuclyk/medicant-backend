@@ -8,14 +8,24 @@ VALUES
 INSERT INTO
   roles (name)
 VALUES
-  ("participant"),
   ("admin"),
-  ("volunteer");
+  ("volunteer"),
+  ("participant");
 
 INSERT INTO
   retreats (id, retreat_code, type)
 VALUES
   (0, "flex", "flexible");
+
+INSERT INTO
+  users (id, password, email, role)
+VALUES
+  (
+    "00000000-0000-0000-0000-000000000000",
+    "$2a$12$arFsFZuNvcoRmtisfuJ9re0ByNVDjA6twSEvGC71C7ji8eOtNaccy",
+    "admin@medicant.cc",
+    "admin"
+  );
 
 -- +goose StatementEnd
 -- +goose Down

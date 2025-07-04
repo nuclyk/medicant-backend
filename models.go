@@ -1,3 +1,5 @@
+// These functions convert the database model to JSON model.
+
 package main
 
 import (
@@ -59,8 +61,8 @@ func (cfg Config) databaseRolesToRoles(dbRoles []database.Role) []Role {
 
 type User struct {
 	ID           uuid.UUID `json:"id"`
-	Created_at   *string   `json:"created_at"`
-	Updated_at   *string   `json:"updated_at"`
+	Created_at   string    `json:"created_at"`
+	Updated_at   string    `json:"updated_at"`
 	FirstName    string    `json:"first_name"`
 	LastName     string    `json:"last_name"`
 	Email        string    `json:"email"`
@@ -78,12 +80,7 @@ type User struct {
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {
-	var date string
 	var diet string
-
-	if user.CheckOutDate != nil {
-		date = *user.CheckOutDate
-	}
 
 	if user.Diet != nil {
 		diet = *user.Diet
@@ -91,8 +88,8 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 
 	return User{
 		ID:           user.ID,
-		Created_at:   &user.Created_at,
-		Updated_at:   &user.Updated_at,
+		Created_at:   user.Created_at.String(),
+		Updated_at:   user.Updated_at.String(),
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
@@ -102,9 +99,9 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		Nationality:  user.Nationality,
 		Role:         user.Role,
 		RetreatID:    user.RetreatID,
-		CheckInDate:  user.CheckInDate,
-		CheckOutDate: date,
-		LeaveDate:    user.LeaveDate,
+		CheckInDate:  user.CheckInDate.Time.String(),
+		CheckOutDate: user.CheckOutDate.Time.String(),
+		LeaveDate:    user.LeaveDate.Time.String(),
 		Diet:         diet,
 		Place:        user.Place,
 	}
@@ -114,12 +111,7 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 	var users []User
 
 	for _, user := range dbUsers {
-		var date string
 		var diet string
-
-		if user.CheckOutDate != nil {
-			date = *user.CheckOutDate
-		}
 
 		if user.Diet != nil {
 			diet = *user.Diet
@@ -127,8 +119,8 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 
 		users = append(users, User{
 			ID:           user.ID,
-			Created_at:   &user.Created_at,
-			Updated_at:   &user.Updated_at,
+			Created_at:   user.Created_at.String(),
+			Updated_at:   user.Updated_at.String(),
 			FirstName:    user.FirstName,
 			LastName:     user.LastName,
 			Email:        user.Email,
@@ -138,9 +130,9 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			Nationality:  user.Nationality,
 			Role:         user.Role,
 			RetreatID:    user.RetreatID,
-			CheckInDate:  user.CheckInDate,
-			CheckOutDate: date,
-			LeaveDate:    user.LeaveDate,
+			CheckInDate:  user.CheckInDate.Time.String(),
+			CheckOutDate: user.CheckOutDate.Time.String(),
+			LeaveDate:    user.LeaveDate.Time.String(),
 			Diet:         diet,
 			Place:        user.Place,
 		})
