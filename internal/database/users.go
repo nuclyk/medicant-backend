@@ -31,7 +31,7 @@ type CreateUserParams struct {
 	CheckInDate  sql.NullTime
 	CheckOutDate sql.NullTime
 	LeaveDate    sql.NullTime
-	Diet         *string
+	Diet         sql.NullString
 	Place        string
 }
 
@@ -53,13 +53,12 @@ const createUser = `
 		nationality,
 		role,
 		retreat_id,
-		check_out_date,
 		leave_date,
 		diet,
 		place
 	  )
 	VALUES
-	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `
 
 func (c Client) CreateUser(params CreateUserParams) (*User, error) {
@@ -79,7 +78,6 @@ func (c Client) CreateUser(params CreateUserParams) (*User, error) {
 		params.Nationality,
 		params.Role,
 		params.RetreatID,
-		params.CheckOutDate,
 		params.LeaveDate,
 		params.Diet,
 		params.Place,
@@ -332,7 +330,7 @@ const updateUser = `
     UPDATE
       users
     SET
-      updated_at = datetime('now', '+7 hours'),
+      updated_at = datetime('now'),
       first_name = ?,
       last_name = ?,
       email = ?,

@@ -2,8 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  created_at timestamp DEFAULT (datetime ('now')),
-  updated_at timestamp DEFAULT (datetime ('now')),
+  created_at TIMESTAMP DEFAULT (datetime ('now')),
+  updated_at TIMESTAMP DEFAULT (datetime ('now')),
   first_name TEXT NOT NULL DEFAULT '',
   last_name TEXT NOT NULL DEFAULT '',
   password TEXT NOT NULL DEFAULT '',
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL DEFAULT 'participant',
   retreat_id INTEGER NOT NULL DEFAULT 0,
   check_in_date DATETIME DEFAULT (datetime ('now')),
-  check_out_date DATETIME,
+  check_out_date DATETIME DEFAULT NULL,
   leave_date DATETIME,
   diet TEXT DEFAULT 'None',
   place TEXT NOT NULL DEFAULT 'None',
@@ -27,11 +27,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS retreats (
   id INTEGER PRIMARY KEY,
   retreat_code TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime ('now')),
-  updated_at TEXT DEFAULT (datetime ('now')),
+  created_at TIMESTAMP NOT NULL DEFAULT (datetime ('now')),
+  updated_at TIMESTAMP NOT NULL DEFAULT (datetime ('now')),
   type TEXT NOT NULL CHECK (type IN ('fixed', 'flexible')),
-  start_date TEXT "",
-  end_date TEXT
+  start_date DATETIME,
+  end_date DATETIME
 );
 
 CREATE TABLE IF NOT EXISTS roles (name TEXT PRIMARY KEY);

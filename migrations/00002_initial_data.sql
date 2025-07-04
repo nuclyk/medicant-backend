@@ -15,7 +15,7 @@ VALUES
 INSERT INTO
   retreats (id, retreat_code, type)
 VALUES
-  (0, "flex", "flexible");
+  (0, "flexible", "flexible");
 
 INSERT INTO
   users (id, password, email, role)

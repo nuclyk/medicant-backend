@@ -80,12 +80,6 @@ type User struct {
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {
-	var diet string
-
-	if user.Diet != nil {
-		diet = *user.Diet
-	}
-
 	return User{
 		ID:           user.ID,
 		Created_at:   user.Created_at.String(),
@@ -102,7 +96,7 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		CheckInDate:  user.CheckInDate.Time.String(),
 		CheckOutDate: user.CheckOutDate.Time.String(),
 		LeaveDate:    user.LeaveDate.Time.String(),
-		Diet:         diet,
+		Diet:         user.Diet.String,
 		Place:        user.Place,
 	}
 }
@@ -111,12 +105,6 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 	var users []User
 
 	for _, user := range dbUsers {
-		var diet string
-
-		if user.Diet != nil {
-			diet = *user.Diet
-		}
-
 		users = append(users, User{
 			ID:           user.ID,
 			Created_at:   user.Created_at.String(),
@@ -133,7 +121,7 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			CheckInDate:  user.CheckInDate.Time.String(),
 			CheckOutDate: user.CheckOutDate.Time.String(),
 			LeaveDate:    user.LeaveDate.Time.String(),
-			Diet:         diet,
+			Diet:         user.Diet.String,
 			Place:        user.Place,
 		})
 	}
@@ -152,25 +140,14 @@ type Retreat struct {
 }
 
 func (cfg Config) databaseRetreatToRetreat(retreat *database.Retreat) Retreat {
-	var startDate string
-	var endDate string
-
-	if retreat.Start_date != nil {
-		startDate = *retreat.Start_date
-	}
-
-	if retreat.End_date != nil {
-		endDate = *retreat.End_date
-	}
-
 	return Retreat{
 		ID:          retreat.ID,
 		RetreatCode: retreat.RetreatCode,
-		Created_at:  retreat.Created_at,
-		Updated_at:  retreat.Updated_at,
+		Created_at:  retreat.Created_at.String(),
+		Updated_at:  retreat.Updated_at.String(),
 		Type:        retreat.Type,
-		Start_date:  startDate,
-		End_date:    endDate,
+		Start_date:  retreat.Start_date.Time.String(),
+		End_date:    retreat.End_date.Time.String(),
 	}
 }
 
@@ -178,25 +155,14 @@ func (cfg Config) databaseRetreatsToRetreats(dbRetreats []database.Retreat) []Re
 	var retreats []Retreat
 
 	for _, retreat := range dbRetreats {
-		var startDate string
-		var endDate string
-
-		if retreat.Start_date != nil {
-			startDate = *retreat.Start_date
-		}
-
-		if retreat.End_date != nil {
-			endDate = *retreat.End_date
-		}
-
 		retreats = append(retreats, Retreat{
 			ID:          retreat.ID,
 			RetreatCode: retreat.RetreatCode,
-			Created_at:  retreat.Created_at,
-			Updated_at:  retreat.Updated_at,
+			Created_at:  retreat.Created_at.String(),
+			Updated_at:  retreat.Updated_at.String(),
 			Type:        retreat.Type,
-			Start_date:  startDate,
-			End_date:    endDate,
+			Start_date:  retreat.Start_date.Time.String(),
+			End_date:    retreat.End_date.Time.String(),
 		})
 	}
 
