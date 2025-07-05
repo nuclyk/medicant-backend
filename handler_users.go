@@ -29,6 +29,7 @@ type CreateUserParams struct {
 	LeaveDate    string `json:"leave_date,omitempty"`
 	Diet         string `json:"diet,omitempty"`
 	Place        int    `json:"place,omitempty"`
+	IsCheckedIn  *bool  `json:"is_checked_in,omitempty"`
 	Reset        bool   `json:"reset,omitempty"`
 }
 
@@ -349,6 +350,7 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 	// we needto reset their check-out date.
 	if params.Reset {
 		user.CheckOutDate = sql.NullTime{Time: time.Time{}, Valid: false}
+		user.IsCheckedIn = true
 	}
 
 	if params.LeaveDate != "" {
@@ -367,6 +369,14 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 
 	if params.Place != 0 {
 		user.Place = params.Place
+	}
+
+	// IsCheckedIn is a pointer to check fo nil value first
+	// and then the value itself
+	if params.IsCheckedIn != nil {
+		if *params.IsCheckedIn != user.IsCheckedIn {
+			user.IsCheckedIn = *params.IsCheckedIn
+		}
 	}
 
 	user, err = cfg.db.UpdateUser(userID, user)

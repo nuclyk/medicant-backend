@@ -33,6 +33,7 @@ type CreateUserParams struct {
 	LeaveDate    sql.NullTime
 	Diet         sql.NullString
 	Place        int
+	IsCheckedIn  bool
 }
 
 type UpdatePasswordParams struct {
@@ -115,7 +116,8 @@ const getUser = `
       check_out_date,
       leave_date,
 	  diet,
-	  place
+	  place,
+	  is_checked_in
     FROM
       users
     WHERE
@@ -149,6 +151,7 @@ func (c Client) GetUser(searchValue string) (*User, error) {
 		&user.LeaveDate,
 		&user.Diet,
 		&user.Place,
+		&user.IsCheckedIn,
 	); err != nil {
 		return nil, err
 	}
@@ -198,7 +201,8 @@ const getUsers = `
 	  check_out_date,
 	  leave_date,
 	  diet,
-	  place
+	  place,
+	  is_checked_in
     FROM
       users;
     `
@@ -236,6 +240,7 @@ func (c Client) GetUsers() ([]User, error) {
 			&user.LeaveDate,
 			&user.Diet,
 			&user.Place,
+			&user.IsCheckedIn,
 		); err != nil {
 			return nil, err
 		}
@@ -319,7 +324,11 @@ func (c Client) UpdatePassword(id string, password UpdatePasswordParams) (string
 	return "password change successful", nil
 }
 
-const checkoutUser = `UPDATE users SET check_out_date = datetime('now', '+7 hours') WHERE email = ?;`
+const checkoutUser = `UPDATE users 
+	SET 
+	  check_out_date = datetime('now'), 
+	  is_checked_in = 0 
+	WHERE email = ?;`
 
 func (c Client) CheckoutUser(email string) error {
 	_, err := c.db.Exec(checkoutUser, email)
@@ -344,7 +353,8 @@ const updateUser = `
       check_out_date = ?,
       leave_date = ?,
       diet = ?,
-      place = ?
+      place = ?,
+      is_checked_in = ?
     WHERE
 	id = ?
     RETURNING 
@@ -364,7 +374,8 @@ const updateUser = `
       check_out_date,
       leave_date,
 	  diet,
-	  place;
+	  place,
+	  is_checked_in
     `
 
 func (c Client) UpdateUser(id string, params *User) (*User, error) {
@@ -386,6 +397,7 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		params.LeaveDate,
 		params.Diet,
 		params.Place,
+		params.IsCheckedIn,
 		id,
 	)
 
@@ -413,6 +425,7 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		&user.LeaveDate,
 		&user.Diet,
 		&user.Place,
+		&user.IsCheckedIn,
 	); err != nil {
 		return nil, err
 	}

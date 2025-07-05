@@ -83,6 +83,7 @@ type User struct {
 	LeaveDate    string    `json:"leave_date"`
 	Diet         string    `json:"diet"`
 	Place        int       `json:"place"`
+	IsCheckedIn  bool      `json:"is_checked_in"`
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {
@@ -104,6 +105,7 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		LeaveDate:    user.LeaveDate.Time.String(),
 		Diet:         user.Diet.String,
 		Place:        user.Place,
+		IsCheckedIn:  user.IsCheckedIn,
 	}
 }
 
@@ -129,6 +131,7 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			LeaveDate:    user.LeaveDate.Time.String(),
 			Diet:         user.Diet.String,
 			Place:        user.Place,
+			IsCheckedIn:  user.IsCheckedIn,
 		})
 	}
 
