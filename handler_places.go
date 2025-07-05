@@ -47,7 +47,7 @@ func (cfg Config) handlerPlacesGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	placeName := r.PathValue("name")
+	id := r.PathValue("id")
 
 	if !validUser.Editor {
 		err := errors.New("wrong user or role")
@@ -55,10 +55,10 @@ func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validU
 		return
 	}
 
-	if placeName != "" {
-		result, err := cfg.db.GetPlace(placeName)
+	if id != "" {
+		result, err := cfg.db.GetPlace(id)
 		if err != nil {
-			respondWithError(w, http.StatusNotFound, fmt.Sprintf("couldn't find: %s", placeName), err)
+			respondWithError(w, http.StatusNotFound, fmt.Sprintf("couldn't find: %s", id), err)
 			return
 		}
 
@@ -71,7 +71,7 @@ func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validU
 }
 
 func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	placeName := r.PathValue("name")
+	id := r.PathValue("id")
 
 	if !validUser.Editor {
 		err := errors.New("wrong user or role")
@@ -81,8 +81,8 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 
 	var params Place
 
-	if placeName == "" {
-		respondWithError(w, http.StatusBadRequest, "provide name of the place", fmt.Errorf("placeName empty"))
+	if id == "" {
+		respondWithError(w, http.StatusBadRequest, "provide name of the place", fmt.Errorf("id empty"))
 		return
 	}
 
@@ -93,7 +93,7 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 		return
 	}
 
-	place, err := cfg.db.GetPlace(placeName)
+	place, err := cfg.db.GetPlace(id)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't find place", err)
@@ -105,11 +105,15 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 		place.Name = params.Name
 	}
 
+	if params.Room != "" {
+		place.Room = params.Room
+	}
+
 	if params.Capacity != "" {
 		place.Capacity = params.Capacity
 	}
 
-	result, err := cfg.db.UpdatePlace(placeName, place)
+	result, err := cfg.db.UpdatePlace(id, place)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error when updating", err)
@@ -120,7 +124,7 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 }
 
 func (cfg Config) handlerPlacesDelete(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	placeName := r.PathValue("name")
+	placeId := r.PathValue("id")
 
 	if !validUser.Editor {
 		err := errors.New("wrong user or role")
@@ -132,7 +136,7 @@ func (cfg Config) handlerPlacesDelete(w http.ResponseWriter, r *http.Request, va
 		Msg string `json:"msg"`
 	}
 
-	successMsg, err := cfg.db.DeletePlace(placeName)
+	successMsg, err := cfg.db.DeletePlace(placeId)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't delete the place", err)

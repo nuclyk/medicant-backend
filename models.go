@@ -10,13 +10,17 @@ import (
 
 // Place model --------------------------------
 type Place struct {
-	Name     string `json:"name,omitempty"`
-	Capacity string `json:"capacity,omitempty"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Room     string `json:"room"`
+	Capacity string `json:"capacity"`
 }
 
 func (cfg Config) databasePlaceToPlace(place *database.Place) Place {
 	return Place{
+		Id:       place.Id,
 		Name:     place.Name,
+		Room:     place.Room,
 		Capacity: place.Capacity,
 	}
 }
@@ -26,7 +30,9 @@ func (cfg Config) databasePlacesToPlaces(dbPlaces []database.Place) []Place {
 
 	for _, place := range dbPlaces {
 		places = append(places, Place{
+			Id:       place.Id,
 			Name:     place.Name,
+			Room:     place.Room,
 			Capacity: place.Capacity,
 		})
 	}

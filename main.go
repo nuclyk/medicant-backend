@@ -119,10 +119,10 @@ func main() {
 
 	// Place handlers
 	mux.HandleFunc("POST /api/places", cfg.JWTAuth(cfg.handlerPlacesCreate))
-	mux.HandleFunc("GET /api/places/{name}", cfg.JWTAuth(cfg.handlerPlaceGet))
+	mux.HandleFunc("GET /api/places/{id}", cfg.JWTAuth(cfg.handlerPlaceGet))
 	mux.HandleFunc("GET /api/places", cfg.handlerPlacesGet)
-	mux.HandleFunc("PUT /api/places/{name}", cfg.JWTAuth(cfg.handlerPlacesUpdate))
-	mux.HandleFunc("DELETE /api/places/{name}", cfg.JWTAuth(cfg.handlerPlacesDelete))
+	mux.HandleFunc("PUT /api/places/{id}", cfg.JWTAuth(cfg.handlerPlacesUpdate))
+	mux.HandleFunc("DELETE /api/places/{id}", cfg.JWTAuth(cfg.handlerPlacesDelete))
 
 	// Refresh Tokens
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)

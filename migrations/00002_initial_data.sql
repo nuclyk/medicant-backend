@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
 INSERT INTO
-  places (name, capacity)
+  places (id, name, capacity, room)
 VALUES
-  ('None', 0);
+  (0, 'None', 0, "");
 
 INSERT INTO
   roles (name)
