@@ -149,7 +149,7 @@ func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUs
 		return
 	}
 
-	respondWithJson(w, http.StatusFound, cfg.databaseUserToUser(user))
+	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 }
 
 func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {

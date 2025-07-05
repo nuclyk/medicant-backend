@@ -15,10 +15,12 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL DEFAULT 'participant',
   retreat_id INTEGER NOT NULL DEFAULT 0,
   check_in_date DATETIME DEFAULT (datetime ('now')),
-  check_out_date DATETIME DEFAULT NULL,
+  check_out_date DATETIME,
   leave_date DATETIME,
   diet TEXT DEFAULT 'None',
   place TEXT NOT NULL DEFAULT 'None',
+  donation INTEGER NOT NULL DEFAULT 0,
+  is_checked_in BOOLEAN NOT NULL DEFAULT 1,
   FOREIGN KEY (role) REFERENCES roles (name) ON UPDATE CASCADE ON DELETE SET DEFAULT,
   FOREIGN KEY (retreat_id) REFERENCES retreats (id) ON UPDATE CASCADE ON DELETE SET DEFAULT,
   FOREIGN KEY (place) REFERENCES places (name) ON UPDATE CASCADE ON DELETE SET DEFAULT
@@ -48,6 +50,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 
 CREATE TABLE IF NOT EXISTS places (
   name TEXT PRIMARY KEY,
+  room TEXT NOT NULL DEFAULT "",
   capacity INTEGER NOT NULL DEFAULT 0
 );
 
