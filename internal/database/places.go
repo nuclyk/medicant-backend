@@ -1,6 +1,8 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Place struct {
 	Id       int
@@ -19,16 +21,17 @@ const createPlace = `
 func (c Client) CreatePlace(params Place) (*Place, error) {
 	c.log.Println("Creating new place")
 
-	_, err := c.db.Exec(createPlace, params.Name, params.Room, params.Capacity)
+	result, err := c.db.Exec(createPlace, params.Name, params.Room, params.Capacity)
 
 	if err != nil {
 		return nil, err
 	}
 
-	place, err := c.GetPlace(params.Name)
+	id, _ := result.LastInsertId()
 
+	place, err := c.GetPlace(int(id))
 	if err != nil {
-		return &Place{}, err
+		return nil, err
 	}
 
 	return &place, nil
@@ -46,8 +49,8 @@ const getPlace = `
 	  id = ?;
 	`
 
-func (c Client) GetPlace(id string) (Place, error) {
-	c.log.Printf("Getting the place: %s\n", id)
+func (c Client) GetPlace(id int) (Place, error) {
+	c.log.Printf("Getting the place: %v\n", id)
 
 	var place Place
 
@@ -117,6 +120,7 @@ const updatePlace = `
 	WHERE
 	  id = ? 
 	RETURNING 
+	  id,
 	  name,
 	  room,
 	  capacity;
@@ -133,7 +137,7 @@ func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 
 	var place Place
 
-	if err := row.Scan(&place.Name, &place.Room, &place.Capacity); err != nil {
+	if err := row.Scan(&place.Id, &place.Name, &place.Room, &place.Capacity); err != nil {
 		return nil, err
 	}
 

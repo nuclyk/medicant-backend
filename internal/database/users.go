@@ -32,7 +32,7 @@ type CreateUserParams struct {
 	CheckOutDate sql.NullTime
 	LeaveDate    sql.NullTime
 	Diet         sql.NullString
-	Place        string
+	Place        int
 }
 
 type UpdatePasswordParams struct {

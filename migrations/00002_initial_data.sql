@@ -3,7 +3,7 @@
 INSERT INTO
   places (id, name, capacity, room)
 VALUES
-  (0, 'None', 0, "");
+  (1, 'None', 0, "");
 
 INSERT INTO
   roles (name)
@@ -15,7 +15,7 @@ VALUES
 INSERT INTO
   retreats (id, retreat_code, type)
 VALUES
-  (0, "flexible", "flexible");
+  (1, "flexible", "flexible");
 
 INSERT INTO
   users (id, password, email, role)

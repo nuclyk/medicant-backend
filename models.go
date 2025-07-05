@@ -82,7 +82,7 @@ type User struct {
 	CheckOutDate string    `json:"check_out_date"`
 	LeaveDate    string    `json:"leave_date"`
 	Diet         string    `json:"diet"`
-	Place        string    `json:"place"`
+	Place        int       `json:"place"`
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {

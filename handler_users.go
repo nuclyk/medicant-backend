@@ -28,7 +28,7 @@ type CreateUserParams struct {
 	CheckOutDate string `json:"check_out_date,omitempty"`
 	LeaveDate    string `json:"leave_date,omitempty"`
 	Diet         string `json:"diet,omitempty"`
-	Place        string `json:"place,omitempty"`
+	Place        int    `json:"place,omitempty"`
 	Reset        bool   `json:"reset,omitempty"`
 }
 
@@ -365,7 +365,7 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 		user.Diet.Valid = true
 	}
 
-	if params.Place != "" {
+	if params.Place != 0 {
 		user.Place = params.Place
 	}
 

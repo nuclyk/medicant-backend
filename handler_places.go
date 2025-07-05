@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/nuclyk/medicant/internal/auth"
 	"github.com/nuclyk/medicant/internal/database"
@@ -56,7 +57,13 @@ func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validU
 	}
 
 	if id != "" {
-		result, err := cfg.db.GetPlace(id)
+		parsedId, err := strconv.Atoi(id)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error when parsing string to int ID param", err)
+			return
+		}
+
+		result, err := cfg.db.GetPlace(parsedId)
 		if err != nil {
 			respondWithError(w, http.StatusNotFound, fmt.Sprintf("couldn't find: %s", id), err)
 			return
@@ -93,7 +100,13 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 		return
 	}
 
-	place, err := cfg.db.GetPlace(id)
+	parsedId, err := strconv.Atoi(id)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error when parsing string to int ID param", err)
+		return
+	}
+
+	place, err := cfg.db.GetPlace(parsedId)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't find place", err)
