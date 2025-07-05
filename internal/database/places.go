@@ -115,17 +115,17 @@ const updatePlace = `
 	  room = ?,
 	  capacity = ?
 	WHERE
-	  name = ? 
+	  id = ? 
 	RETURNING 
 	  name,
 	  room,
 	  capacity;
 	`
 
-func (c Client) UpdatePlace(name string, params Place) (*Place, error) {
+func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 	c.log.Printf("Updating place: %s", params.Name)
 
-	row := c.db.QueryRow(updatePlace, params.Name, params.Room, params.Capacity, name)
+	row := c.db.QueryRow(updatePlace, params.Name, params.Room, params.Capacity, id)
 
 	if row.Err() != nil {
 		return nil, row.Err()
