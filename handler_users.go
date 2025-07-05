@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,21 +14,22 @@ import (
 )
 
 type CreateUserParams struct {
-	FirstName    string  `json:"first_name,omitempty"`
-	LastName     string  `json:"last_name,omitempty"`
-	Email        string  `json:"email,omitempty"`
-	Password     string  `json:"password,omitempty"`
-	Phone        string  `json:"phone,omitempty"`
-	Age          string  `json:"age,omitempty"`
-	Gender       string  `json:"gender,omitempty"`
-	Nationality  string  `json:"nationality,omitempty"`
-	Role         string  `json:"role,omitempty"`
-	RetreatID    int     `json:"retreat_id,omitempty"`
-	CheckInDate  string  `json:"check_in_date,omitempty"`
-	CheckOutDate *string `json:"check_out_date,omitempty"`
-	LeaveDate    string  `json:"leave_date,omitempty"`
-	Diet         *string `json:"diet,omitempty"`
-	Place        string  `json:"place,omitempty"`
+	FirstName    string `json:"first_name,omitempty"`
+	LastName     string `json:"last_name,omitempty"`
+	Email        string `json:"email,omitempty"`
+	Password     string `json:"password,omitempty"`
+	Phone        string `json:"phone,omitempty"`
+	Age          string `json:"age,omitempty"`
+	Gender       string `json:"gender,omitempty"`
+	Nationality  string `json:"nationality,omitempty"`
+	Role         string `json:"role,omitempty"`
+	RetreatID    int    `json:"retreat_id,omitempty"`
+	CheckInDate  string `json:"check_in_date,omitempty"`
+	CheckOutDate string `json:"check_out_date,omitempty"`
+	LeaveDate    string `json:"leave_date,omitempty"`
+	Diet         string `json:"diet,omitempty"`
+	Place        int    `json:"place,omitempty"`
+	Reset        bool   `json:"reset,omitempty"`
 }
 
 func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +41,8 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "error while decoding request body", err)
 		return
 	}
+
+	fmt.Println(params)
 
 	// If password is provided then hash it
 	if params.Password != "" {
@@ -67,6 +71,35 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Dealing with null time values
+	var checkInDate sql.NullTime
+	var checkOutDate sql.NullTime
+	var leaveDate sql.NullTime
+	var diet sql.NullString
+
+	if params.CheckInDate != "" {
+		time, _ := time.Parse(time.RFC1123, params.CheckInDate)
+		checkInDate.Time = time
+		checkInDate.Valid = true
+	}
+
+	if params.CheckOutDate != "" {
+		time, _ := time.Parse(time.RFC1123, params.CheckOutDate)
+		checkOutDate.Time = time
+		checkOutDate.Valid = true
+	}
+
+	if params.LeaveDate != "" {
+		time, _ := time.Parse("2006-01-02", params.LeaveDate)
+		leaveDate.Time = time
+		leaveDate.Valid = true
+	}
+
+	if params.Diet != "" {
+		diet.String = params.Diet
+		diet.Valid = true
+	}
+
 	user, err := cfg.db.CreateUser(database.CreateUserParams{
 		FirstName:    params.FirstName,
 		LastName:     params.LastName,
@@ -78,10 +111,10 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		Nationality:  params.Nationality,
 		Role:         params.Role,
 		RetreatID:    params.RetreatID,
-		CheckInDate:  params.CheckInDate,
-		CheckOutDate: params.CheckOutDate,
-		LeaveDate:    params.LeaveDate,
-		Diet:         params.Diet,
+		CheckInDate:  checkInDate,
+		CheckOutDate: checkOutDate,
+		LeaveDate:    leaveDate,
+		Diet:         diet,
 		Place:        params.Place,
 	})
 
@@ -116,7 +149,7 @@ func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUs
 		return
 	}
 
-	respondWithJson(w, http.StatusFound, cfg.databaseUserToUser(user))
+	respondWithJson(w, http.StatusOK, cfg.databaseUserToUser(user))
 }
 
 func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
@@ -211,7 +244,7 @@ func (cfg Config) handlerUserCheckout(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&user); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error while decoding", err)
+		respondWithError(w, http.StatusInternalServerError, "Could not decode the JSON request", err)
 		return
 	}
 
@@ -219,7 +252,7 @@ func (cfg Config) handlerUserCheckout(w http.ResponseWriter, r *http.Request) {
 
 	err := cfg.db.CheckoutUser(user.Email)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "error when checking out the user", err)
+		respondWithError(w, http.StatusBadRequest, "Error at check-out", err)
 		return
 	}
 
@@ -231,28 +264,28 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 	userID := r.PathValue("userID")
 
 	if userID == "" {
-		respondWithError(w, http.StatusBadRequest, "provide valid id or email", fmt.Errorf("invalid id or email"))
+		respondWithError(w, http.StatusBadRequest, "Wrong User ID or Email", fmt.Errorf("wrong user id or email"))
 		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error while decoding", err)
+		respondWithError(w, http.StatusInternalServerError, "Could not decode the JSON request", err)
 		return
 	}
 
 	user, err := cfg.db.GetUser(userID)
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't fetch a user", err)
+		respondWithError(w, http.StatusInternalServerError, "Error when fetching a user", err)
 		return
 	}
 
 	validUser.Owner = user.ID == validUser.ID
 
 	if !validUser.Owner && !validUser.Editor {
-		respondWithError(w, http.StatusUnauthorized, "Wrong user or role",
+		respondWithError(w, http.StatusUnauthorized, "Wrong User or Role",
 			errors.New("wrong user or role"))
 		return
 	}
@@ -295,29 +328,51 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 	}
 
 	if params.CheckInDate != "" {
-		user.CheckInDate = params.CheckInDate
+		parsedDate, err := time.Parse(time.RFC3339, params.CheckInDate)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error when parsing check in date", err)
+			return
+		}
+		user.CheckInDate = sql.NullTime{Time: parsedDate, Valid: true}
 	}
 
-	if params.CheckOutDate != nil {
-		user.CheckOutDate = params.CheckOutDate
+	if params.CheckOutDate != "" {
+		parsedDate, err := time.Parse(time.RFC3339, params.CheckOutDate)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error when parsing check out date", err)
+			return
+		}
+		user.CheckOutDate = sql.NullTime{Time: parsedDate, Valid: true}
+	}
+
+	// For the returning participants, if they use the same email,
+	// we needto reset their check-out date.
+	if params.Reset {
+		user.CheckOutDate = sql.NullTime{Time: time.Time{}, Valid: false}
 	}
 
 	if params.LeaveDate != "" {
-		user.LeaveDate = params.LeaveDate
+		parsedDate, err := time.Parse("2006-01-02", params.LeaveDate)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error when parsing leave date", err)
+			return
+		}
+		user.LeaveDate = sql.NullTime{Time: parsedDate, Valid: true}
 	}
 
-	if params.Diet != nil {
-		user.Diet = params.Diet
+	if params.Diet != "" {
+		user.Diet.String = params.Diet
+		user.Diet.Valid = true
 	}
 
-	if params.Place != "" {
+	if params.Place != 0 {
 		user.Place = params.Place
 	}
 
 	user, err = cfg.db.UpdateUser(userID, user)
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't update the user", err)
+		respondWithError(w, http.StatusInternalServerError, "Error when updating the user", err)
 		return
 	}
 
@@ -340,7 +395,7 @@ func (cfg Config) handlerUsersDelete(w http.ResponseWriter, r *http.Request, val
 	successMsg, err := cfg.db.DeleteUser(userID)
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't delete the user", err)
+		respondWithError(w, http.StatusInternalServerError, "Error when deleting the user", err)
 		return
 	}
 

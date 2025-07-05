@@ -1,21 +1,31 @@
 -- +goose Up
 -- +goose StatementBegin
 INSERT INTO
-  places (name, capacity)
+  places (id, name, capacity, room)
 VALUES
-  ('None', 0);
+  (1, 'None', 0, "");
 
 INSERT INTO
   roles (name)
 VALUES
-  ("participant"),
   ("admin"),
-  ("volunteer");
+  ("volunteer"),
+  ("participant");
 
 INSERT INTO
   retreats (id, retreat_code, type)
 VALUES
-  (0, "flex", "flexible");
+  (1, "flexible", "flexible");
+
+INSERT INTO
+  users (id, password, email, role)
+VALUES
+  (
+    "00000000-0000-0000-0000-000000000000",
+    "$2a$12$arFsFZuNvcoRmtisfuJ9re0ByNVDjA6twSEvGC71C7ji8eOtNaccy",
+    "admin@medicant.cc",
+    "admin"
+  );
 
 -- +goose StatementEnd
 -- +goose Down

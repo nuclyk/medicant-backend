@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
@@ -9,15 +10,15 @@ import (
 type Retreat struct {
 	ID          int
 	RetreatCode string
-	Created_at  string
-	Updated_at  string
+	Created_at  time.Time
+	Updated_at  time.Time
 	CreateRetreatParams
 }
 
 type CreateRetreatParams struct {
 	Type       string
-	Start_date *string
-	End_date   *string
+	Start_date sql.NullTime
+	End_date   sql.NullTime
 }
 
 const createRetreat = `
@@ -35,8 +36,10 @@ const createRetreat = `
 func (c Client) CreateRetreat(params CreateRetreatParams) (*Retreat, error) {
 	c.log.Println("Creating new retreat")
 
-	start_date := *params.Start_date
-	retreat_code := fmt.Sprintf("%s-%s", params.Type[:3], start_date[5:])
+	day := params.Start_date.Time.Day()
+	month := params.Start_date.Time.Month()
+
+	retreat_code := fmt.Sprintf("%s-%v-%v", params.Type[:3], day, month)
 
 	result, err := c.db.Exec(createRetreat,
 		retreat_code,
@@ -148,16 +151,17 @@ const updateRetreat = `
 	UPDATE
 	  retreats
 	SET
-	  updated_at = ?,
+	  updated_at = datetime('now'),
 	  type = ?,
+	  retreat_code = ?,
 	  start_date = ?,
 	  end_date = ?
 	WHERE
 	  id = ?
 	RETURNING id,
-	  retreat_code,
 	  created_at,
 	  updated_at,
+	  retreat_code,
 	  type,
 	  start_date,
 	  end_date;
@@ -167,8 +171,8 @@ func (c Client) UpdateRetreat(id string, params Retreat) (Retreat, error) {
 	c.log.Println("Updating retreat")
 
 	row := c.db.QueryRow(updateRetreat,
-		time.Now(),
 		params.Type,
+		params.RetreatCode,
 		params.Start_date,
 		params.End_date,
 		id,
@@ -182,9 +186,9 @@ func (c Client) UpdateRetreat(id string, params Retreat) (Retreat, error) {
 
 	if err := row.Scan(
 		&retreat.ID,
-		&retreat.RetreatCode,
 		&retreat.Created_at,
 		&retreat.Updated_at,
+		&retreat.RetreatCode,
 		&retreat.Type,
 		&retreat.Start_date,
 		&retreat.End_date,

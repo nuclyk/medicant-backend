@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -11,8 +12,8 @@ import (
 
 type User struct {
 	ID         uuid.UUID
-	Created_at string
-	Updated_at string
+	Created_at time.Time
+	Updated_at time.Time
 	CreateUserParams
 }
 
@@ -27,11 +28,11 @@ type CreateUserParams struct {
 	Nationality  string
 	Role         string
 	RetreatID    int
-	CheckInDate  string
-	CheckOutDate *string
-	LeaveDate    string
-	Diet         *string
-	Place        string
+	CheckInDate  sql.NullTime
+	CheckOutDate sql.NullTime
+	LeaveDate    sql.NullTime
+	Diet         sql.NullString
+	Place        int
 }
 
 type UpdatePasswordParams struct {
@@ -52,13 +53,12 @@ const createUser = `
 		nationality,
 		role,
 		retreat_id,
-		check_out_date,
 		leave_date,
 		diet,
 		place
 	  )
 	VALUES
-	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `
 
 func (c Client) CreateUser(params CreateUserParams) (*User, error) {
@@ -78,7 +78,6 @@ func (c Client) CreateUser(params CreateUserParams) (*User, error) {
 		params.Nationality,
 		params.Role,
 		params.RetreatID,
-		params.CheckOutDate,
 		params.LeaveDate,
 		params.Diet,
 		params.Place,
@@ -331,7 +330,7 @@ const updateUser = `
     UPDATE
       users
     SET
-      updated_at = datetime('now', '+7 hours'),
+      updated_at = datetime('now'),
       first_name = ?,
       last_name = ?,
       email = ?,

@@ -1,32 +1,37 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Place struct {
+	Id       int
 	Name     string
+	Room     string
 	Capacity string
 }
 
 const createPlace = `
 	INSERT INTO
-	  places (name, capacity)
+	  places (name, room, capacity)
 	VALUES
-	  (?, ?);
+	  (?, ?, ?);
 	`
 
 func (c Client) CreatePlace(params Place) (*Place, error) {
 	c.log.Println("Creating new place")
 
-	_, err := c.db.Exec(createPlace, params.Name, params.Capacity)
+	result, err := c.db.Exec(createPlace, params.Name, params.Room, params.Capacity)
 
 	if err != nil {
 		return nil, err
 	}
 
-	place, err := c.GetPlace(params.Name)
+	id, _ := result.LastInsertId()
 
+	place, err := c.GetPlace(int(id))
 	if err != nil {
-		return &Place{}, err
+		return nil, err
 	}
 
 	return &place, nil
@@ -34,20 +39,22 @@ func (c Client) CreatePlace(params Place) (*Place, error) {
 
 const getPlace = `
 	SELECT
+	  id,
 	  name,
+	  room,
 	  capacity
 	FROM
 	  places
 	WHERE
-	  name = ?;
+	  id = ?;
 	`
 
-func (c Client) GetPlace(name string) (Place, error) {
-	c.log.Printf("Getting the place: %s\n", name)
+func (c Client) GetPlace(id int) (Place, error) {
+	c.log.Printf("Getting the place: %v\n", id)
 
 	var place Place
 
-	err := c.db.QueryRow(getPlace, name).Scan(&place.Name, &place.Capacity)
+	err := c.db.QueryRow(getPlace, id).Scan(&place.Id, &place.Name, &place.Room, &place.Capacity)
 
 	if err != nil {
 		return Place{}, err
@@ -58,7 +65,9 @@ func (c Client) GetPlace(name string) (Place, error) {
 
 const getPlaces = `
 	SELECT
+	  id,
 	  name,
+	  room,
 	  capacity
 	FROM
 	  places;
@@ -80,7 +89,9 @@ func (c Client) GetPlaces() ([]Place, error) {
 		var place Place
 
 		if err := rows.Scan(
+			&place.Id,
 			&place.Name,
+			&place.Room,
 			&place.Capacity,
 		); err != nil {
 			return nil, err
@@ -104,16 +115,21 @@ const updatePlace = `
 	UPDATE places
 	SET
 	  name = ?,
+	  room = ?,
 	  capacity = ?
 	WHERE
-	  name = ? RETURNING name,
+	  id = ? 
+	RETURNING 
+	  id,
+	  name,
+	  room,
 	  capacity;
 	`
 
-func (c Client) UpdatePlace(name string, params Place) (*Place, error) {
+func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 	c.log.Printf("Updating place: %s", params.Name)
 
-	row := c.db.QueryRow(updatePlace, params.Name, params.Capacity, name)
+	row := c.db.QueryRow(updatePlace, params.Name, params.Room, params.Capacity, id)
 
 	if row.Err() != nil {
 		return nil, row.Err()
@@ -121,7 +137,7 @@ func (c Client) UpdatePlace(name string, params Place) (*Place, error) {
 
 	var place Place
 
-	if err := row.Scan(&place.Name, &place.Capacity); err != nil {
+	if err := row.Scan(&place.Id, &place.Name, &place.Room, &place.Capacity); err != nil {
 		return nil, err
 	}
 
@@ -130,17 +146,17 @@ func (c Client) UpdatePlace(name string, params Place) (*Place, error) {
 
 const deletePlace = `
 	DELETE FROM places
-	WHERE name = ?;
+	WHERE id = ?;
 	`
 
-func (c Client) DeletePlace(name string) (string, error) {
-	c.log.Printf("Deleting a place: %s", name)
+func (c Client) DeletePlace(id string) (string, error) {
+	c.log.Printf("Deleting a place: %s", id)
 
-	_, err := c.db.Exec(deletePlace, name)
+	_, err := c.db.Exec(deletePlace, id)
 
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("Place `%s` was deleted", name), nil
+	return fmt.Sprintf("Place `%s` was deleted", id), nil
 }

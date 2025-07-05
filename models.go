@@ -1,3 +1,5 @@
+// These functions convert the database model to JSON model.
+
 package main
 
 import (
@@ -8,13 +10,17 @@ import (
 
 // Place model --------------------------------
 type Place struct {
-	Name     string `json:"name,omitempty"`
-	Capacity string `json:"capacity,omitempty"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Room     string `json:"room"`
+	Capacity string `json:"capacity"`
 }
 
 func (cfg Config) databasePlaceToPlace(place *database.Place) Place {
 	return Place{
+		Id:       place.Id,
 		Name:     place.Name,
+		Room:     place.Room,
 		Capacity: place.Capacity,
 	}
 }
@@ -24,7 +30,9 @@ func (cfg Config) databasePlacesToPlaces(dbPlaces []database.Place) []Place {
 
 	for _, place := range dbPlaces {
 		places = append(places, Place{
+			Id:       place.Id,
 			Name:     place.Name,
+			Room:     place.Room,
 			Capacity: place.Capacity,
 		})
 	}
@@ -59,8 +67,8 @@ func (cfg Config) databaseRolesToRoles(dbRoles []database.Role) []Role {
 
 type User struct {
 	ID           uuid.UUID `json:"id"`
-	Created_at   *string   `json:"created_at"`
-	Updated_at   *string   `json:"updated_at"`
+	Created_at   string    `json:"created_at"`
+	Updated_at   string    `json:"updated_at"`
 	FirstName    string    `json:"first_name"`
 	LastName     string    `json:"last_name"`
 	Email        string    `json:"email"`
@@ -74,25 +82,14 @@ type User struct {
 	CheckOutDate string    `json:"check_out_date"`
 	LeaveDate    string    `json:"leave_date"`
 	Diet         string    `json:"diet"`
-	Place        string    `json:"place"`
+	Place        int       `json:"place"`
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {
-	var date string
-	var diet string
-
-	if user.CheckOutDate != nil {
-		date = *user.CheckOutDate
-	}
-
-	if user.Diet != nil {
-		diet = *user.Diet
-	}
-
 	return User{
 		ID:           user.ID,
-		Created_at:   &user.Created_at,
-		Updated_at:   &user.Updated_at,
+		Created_at:   user.Created_at.String(),
+		Updated_at:   user.Updated_at.String(),
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
@@ -102,10 +99,10 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		Nationality:  user.Nationality,
 		Role:         user.Role,
 		RetreatID:    user.RetreatID,
-		CheckInDate:  user.CheckInDate,
-		CheckOutDate: date,
-		LeaveDate:    user.LeaveDate,
-		Diet:         diet,
+		CheckInDate:  user.CheckInDate.Time.String(),
+		CheckOutDate: user.CheckOutDate.Time.String(),
+		LeaveDate:    user.LeaveDate.Time.String(),
+		Diet:         user.Diet.String,
 		Place:        user.Place,
 	}
 }
@@ -114,21 +111,10 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 	var users []User
 
 	for _, user := range dbUsers {
-		var date string
-		var diet string
-
-		if user.CheckOutDate != nil {
-			date = *user.CheckOutDate
-		}
-
-		if user.Diet != nil {
-			diet = *user.Diet
-		}
-
 		users = append(users, User{
 			ID:           user.ID,
-			Created_at:   &user.Created_at,
-			Updated_at:   &user.Updated_at,
+			Created_at:   user.Created_at.String(),
+			Updated_at:   user.Updated_at.String(),
 			FirstName:    user.FirstName,
 			LastName:     user.LastName,
 			Email:        user.Email,
@@ -138,10 +124,10 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			Nationality:  user.Nationality,
 			Role:         user.Role,
 			RetreatID:    user.RetreatID,
-			CheckInDate:  user.CheckInDate,
-			CheckOutDate: date,
-			LeaveDate:    user.LeaveDate,
-			Diet:         diet,
+			CheckInDate:  user.CheckInDate.Time.String(),
+			CheckOutDate: user.CheckOutDate.Time.String(),
+			LeaveDate:    user.LeaveDate.Time.String(),
+			Diet:         user.Diet.String,
 			Place:        user.Place,
 		})
 	}
@@ -160,25 +146,14 @@ type Retreat struct {
 }
 
 func (cfg Config) databaseRetreatToRetreat(retreat *database.Retreat) Retreat {
-	var startDate string
-	var endDate string
-
-	if retreat.Start_date != nil {
-		startDate = *retreat.Start_date
-	}
-
-	if retreat.End_date != nil {
-		endDate = *retreat.End_date
-	}
-
 	return Retreat{
 		ID:          retreat.ID,
 		RetreatCode: retreat.RetreatCode,
-		Created_at:  retreat.Created_at,
-		Updated_at:  retreat.Updated_at,
+		Created_at:  retreat.Created_at.String(),
+		Updated_at:  retreat.Updated_at.String(),
 		Type:        retreat.Type,
-		Start_date:  startDate,
-		End_date:    endDate,
+		Start_date:  retreat.Start_date.Time.String(),
+		End_date:    retreat.End_date.Time.String(),
 	}
 }
 
@@ -186,25 +161,14 @@ func (cfg Config) databaseRetreatsToRetreats(dbRetreats []database.Retreat) []Re
 	var retreats []Retreat
 
 	for _, retreat := range dbRetreats {
-		var startDate string
-		var endDate string
-
-		if retreat.Start_date != nil {
-			startDate = *retreat.Start_date
-		}
-
-		if retreat.End_date != nil {
-			endDate = *retreat.End_date
-		}
-
 		retreats = append(retreats, Retreat{
 			ID:          retreat.ID,
 			RetreatCode: retreat.RetreatCode,
-			Created_at:  retreat.Created_at,
-			Updated_at:  retreat.Updated_at,
+			Created_at:  retreat.Created_at.String(),
+			Updated_at:  retreat.Updated_at.String(),
 			Type:        retreat.Type,
-			Start_date:  startDate,
-			End_date:    endDate,
+			Start_date:  retreat.Start_date.Time.String(),
+			End_date:    retreat.End_date.Time.String(),
 		})
 	}
 
