@@ -126,6 +126,10 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 		place.Capacity = params.Capacity
 	}
 
+	if params.IsClean != nil {
+		place.IsClean = *params.IsClean
+	}
+
 	result, err := cfg.db.UpdatePlace(id, place)
 
 	if err != nil {

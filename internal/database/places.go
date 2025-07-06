@@ -9,6 +9,7 @@ type Place struct {
 	Name     string
 	Room     string
 	Capacity string
+	IsClean  bool
 }
 
 const createPlace = `
@@ -42,7 +43,8 @@ const getPlace = `
 	  id,
 	  name,
 	  room,
-	  capacity
+	  capacity,
+	  is_clean
 	FROM
 	  places
 	WHERE
@@ -54,7 +56,13 @@ func (c Client) GetPlace(id int) (Place, error) {
 
 	var place Place
 
-	err := c.db.QueryRow(getPlace, id).Scan(&place.Id, &place.Name, &place.Room, &place.Capacity)
+	err := c.db.QueryRow(getPlace, id).Scan(
+		&place.Id,
+		&place.Name,
+		&place.Room,
+		&place.Capacity,
+		&place.IsClean,
+	)
 
 	if err != nil {
 		return Place{}, err
@@ -68,7 +76,8 @@ const getPlaces = `
 	  id,
 	  name,
 	  room,
-	  capacity
+	  capacity,
+	  is_clean
 	FROM
 	  places;
 	`
@@ -93,6 +102,7 @@ func (c Client) GetPlaces() ([]Place, error) {
 			&place.Name,
 			&place.Room,
 			&place.Capacity,
+			&place.IsClean,
 		); err != nil {
 			return nil, err
 		}
@@ -116,20 +126,29 @@ const updatePlace = `
 	SET
 	  name = ?,
 	  room = ?,
-	  capacity = ?
+	  capacity = ?,
+	  is_clean = ?,
 	WHERE
 	  id = ? 
 	RETURNING 
 	  id,
 	  name,
 	  room,
-	  capacity;
+	  capacity,
+	  is_clean
 	`
 
 func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 	c.log.Printf("Updating place: %s", params.Name)
 
-	row := c.db.QueryRow(updatePlace, params.Name, params.Room, params.Capacity, id)
+	row := c.db.QueryRow(
+		updatePlace,
+		params.Name,
+		params.Room,
+		params.Capacity,
+		params.IsClean,
+		id,
+	)
 
 	if row.Err() != nil {
 		return nil, row.Err()
@@ -137,7 +156,13 @@ func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 
 	var place Place
 
-	if err := row.Scan(&place.Id, &place.Name, &place.Room, &place.Capacity); err != nil {
+	if err := row.Scan(
+		&place.Id,
+		&place.Name,
+		&place.Room,
+		&place.Capacity,
+		&place.IsClean,
+	); err != nil {
 		return nil, err
 	}
 

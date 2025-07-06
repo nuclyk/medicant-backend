@@ -16,6 +16,7 @@ type Place struct {
 	Name     string `json:"name"`
 	Room     string `json:"room"`
 	Capacity string `json:"capacity"`
+	IsClean  *bool  `json:"is_clean"`
 }
 
 func (cfg Config) databasePlaceToPlace(place *database.Place) Place {
@@ -24,6 +25,7 @@ func (cfg Config) databasePlaceToPlace(place *database.Place) Place {
 		Name:     place.Name,
 		Room:     place.Room,
 		Capacity: place.Capacity,
+		IsClean:  &place.IsClean,
 	}
 }
 
@@ -36,6 +38,7 @@ func (cfg Config) databasePlacesToPlaces(dbPlaces []database.Place) []Place {
 			Name:     place.Name,
 			Room:     place.Room,
 			Capacity: place.Capacity,
+			IsClean:  &place.IsClean,
 		})
 	}
 
