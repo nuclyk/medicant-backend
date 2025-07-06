@@ -3,6 +3,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 
 	"github.com/nuclyk/medicant/internal/database"
@@ -67,8 +69,8 @@ func (cfg Config) databaseRolesToRoles(dbRoles []database.Role) []Role {
 
 type User struct {
 	ID           uuid.UUID `json:"id"`
-	Created_at   string    `json:"created_at"`
-	Updated_at   string    `json:"updated_at"`
+	Created_at   time.Time `json:"created_at"`
+	Updated_at   time.Time `json:"updated_at"`
 	FirstName    string    `json:"first_name"`
 	LastName     string    `json:"last_name"`
 	Email        string    `json:"email"`
@@ -78,9 +80,9 @@ type User struct {
 	Nationality  string    `json:"nationality"`
 	Role         string    `json:"role"`
 	RetreatID    int       `json:"retreat_id"`
-	CheckInDate  string    `json:"check_in_date"`
-	CheckOutDate string    `json:"check_out_date"`
-	LeaveDate    string    `json:"leave_date"`
+	CheckInDate  time.Time `json:"check_in_date"`
+	CheckOutDate time.Time `json:"check_out_date"`
+	LeaveDate    time.Time `json:"leave_date"`
 	Diet         string    `json:"diet"`
 	Place        int       `json:"place"`
 	IsCheckedIn  bool      `json:"is_checked_in"`
@@ -89,8 +91,8 @@ type User struct {
 func (cfg Config) databaseUserToUser(user *database.User) User {
 	return User{
 		ID:           user.ID,
-		Created_at:   user.Created_at.String(),
-		Updated_at:   user.Updated_at.String(),
+		Created_at:   user.Created_at,
+		Updated_at:   user.Updated_at,
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
@@ -100,9 +102,9 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		Nationality:  user.Nationality,
 		Role:         user.Role,
 		RetreatID:    user.RetreatID,
-		CheckInDate:  user.CheckInDate.Time.String(),
-		CheckOutDate: user.CheckOutDate.Time.String(),
-		LeaveDate:    user.LeaveDate.Time.String(),
+		CheckInDate:  user.CheckInDate.Time,
+		CheckOutDate: user.CheckOutDate.Time,
+		LeaveDate:    user.LeaveDate.Time,
 		Diet:         user.Diet.String,
 		Place:        user.Place,
 		IsCheckedIn:  user.IsCheckedIn,
@@ -115,8 +117,8 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 	for _, user := range dbUsers {
 		users = append(users, User{
 			ID:           user.ID,
-			Created_at:   user.Created_at.String(),
-			Updated_at:   user.Updated_at.String(),
+			Created_at:   user.Created_at,
+			Updated_at:   user.Updated_at,
 			FirstName:    user.FirstName,
 			LastName:     user.LastName,
 			Email:        user.Email,
@@ -126,9 +128,9 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			Nationality:  user.Nationality,
 			Role:         user.Role,
 			RetreatID:    user.RetreatID,
-			CheckInDate:  user.CheckInDate.Time.String(),
-			CheckOutDate: user.CheckOutDate.Time.String(),
-			LeaveDate:    user.LeaveDate.Time.String(),
+			CheckInDate:  user.CheckInDate.Time,
+			CheckOutDate: user.CheckOutDate.Time,
+			LeaveDate:    user.LeaveDate.Time,
 			Diet:         user.Diet.String,
 			Place:        user.Place,
 			IsCheckedIn:  user.IsCheckedIn,
