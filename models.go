@@ -86,6 +86,7 @@ type User struct {
 	Diet         string    `json:"diet"`
 	Place        int       `json:"place"`
 	IsCheckedIn  bool      `json:"is_checked_in"`
+	Donation     int       `json:"donation"`
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {
@@ -108,6 +109,7 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		Diet:         user.Diet.String,
 		Place:        user.Place,
 		IsCheckedIn:  user.IsCheckedIn,
+		Donation:     user.Donation,
 	}
 }
 
@@ -134,6 +136,7 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			Diet:         user.Diet.String,
 			Place:        user.Place,
 			IsCheckedIn:  user.IsCheckedIn,
+			Donation:     user.Donation,
 		})
 	}
 

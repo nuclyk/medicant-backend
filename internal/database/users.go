@@ -34,6 +34,7 @@ type CreateUserParams struct {
 	Diet         sql.NullString
 	Place        int
 	IsCheckedIn  bool
+	Donation     int
 }
 
 type UpdatePasswordParams struct {
@@ -117,7 +118,8 @@ const getUser = `
       leave_date,
 	  diet,
 	  place,
-	  is_checked_in
+	  is_checked_in,
+	  donation
     FROM
       users
     WHERE
@@ -152,6 +154,7 @@ func (c Client) GetUser(searchValue string) (*User, error) {
 		&user.Diet,
 		&user.Place,
 		&user.IsCheckedIn,
+		&user.Donation,
 	); err != nil {
 		return nil, err
 	}
@@ -202,7 +205,8 @@ const getUsers = `
 	  leave_date,
 	  diet,
 	  place,
-	  is_checked_in
+	  is_checked_in,
+	  donation
     FROM
       users;
     `
@@ -241,6 +245,7 @@ func (c Client) GetUsers() ([]User, error) {
 			&user.Diet,
 			&user.Place,
 			&user.IsCheckedIn,
+			&user.Donation,
 		); err != nil {
 			return nil, err
 		}
@@ -354,7 +359,8 @@ const updateUser = `
       leave_date = ?,
       diet = ?,
       place = ?,
-      is_checked_in = ?
+      is_checked_in = ?,
+	  donation = ?
     WHERE
 	id = ?
     RETURNING 
@@ -375,7 +381,8 @@ const updateUser = `
       leave_date,
 	  diet,
 	  place,
-	  is_checked_in
+	  is_checked_in,
+	  donation
     `
 
 func (c Client) UpdateUser(id string, params *User) (*User, error) {
@@ -398,6 +405,7 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		params.Diet,
 		params.Place,
 		params.IsCheckedIn,
+		params.Donation,
 		id,
 	)
 
@@ -426,6 +434,7 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		&user.Diet,
 		&user.Place,
 		&user.IsCheckedIn,
+		&user.Donation,
 	); err != nil {
 		return nil, err
 	}

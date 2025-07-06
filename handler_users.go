@@ -30,6 +30,7 @@ type CreateUserParams struct {
 	Diet         string `json:"diet,omitempty"`
 	Place        int    `json:"place,omitempty"`
 	IsCheckedIn  *bool  `json:"is_checked_in,omitempty"`
+	Donation     *int   `json:"donation,omitempty"`
 	Reset        bool   `json:"reset,omitempty"`
 }
 
@@ -377,6 +378,10 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 		if *params.IsCheckedIn != user.IsCheckedIn {
 			user.IsCheckedIn = *params.IsCheckedIn
 		}
+	}
+
+	if params.Donation != nil {
+		user.Donation = *params.Donation
 	}
 
 	user, err = cfg.db.UpdateUser(userID, user)
