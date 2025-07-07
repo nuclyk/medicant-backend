@@ -10,6 +10,44 @@ import (
 	"github.com/nuclyk/medicant/internal/database"
 )
 
+// Room model --------------------------------
+type Room struct {
+	Id        int   `json:"id"`
+	Number    int   `json:"number"`
+	CheckedIn int   `json:"checked_in"`
+	Capacity  int   `json:"capacity"`
+	PlaceId   int   `json:"place_id"`
+	IsClean   *bool `json:"is_clean"`
+}
+
+func (cfg Config) databaseRoomToRoom(room *database.Room) Room {
+	return Room{
+		Id:        room.Id,
+		Number:    room.Number,
+		CheckedIn: room.CheckedIn,
+		Capacity:  room.Capacity,
+		PlaceId:   room.PlaceId,
+		IsClean:   &room.IsClean,
+	}
+}
+
+func (cfg Config) databaseRoomsToRooms(dbRooms []database.Room) []Room {
+	var rooms []Room
+
+	for _, room := range dbRooms {
+		rooms = append(rooms, Room{
+			Id:        room.Id,
+			Number:    room.Number,
+			CheckedIn: room.CheckedIn,
+			Capacity:  room.Capacity,
+			PlaceId:   room.PlaceId,
+			IsClean:   &room.IsClean,
+		})
+	}
+
+	return rooms
+}
+
 // Place model --------------------------------
 type Place struct {
 	Id       int    `json:"id"`

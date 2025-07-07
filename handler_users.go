@@ -44,8 +44,6 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(params)
-
 	// If password is provided then hash it
 	if params.Password != "" {
 		hashedPassword, err := auth.HashPassword(params.Password)
