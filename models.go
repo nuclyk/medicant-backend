@@ -14,8 +14,8 @@ import (
 type Room struct {
 	Id        int   `json:"id"`
 	Number    int   `json:"number"`
-	CheckedIn int   `json:"checked_in"`
 	Capacity  int   `json:"capacity"`
+	CheckedIn int   `json:"checked_in"`
 	PlaceId   int   `json:"place_id"`
 	IsClean   *bool `json:"is_clean"`
 }
@@ -24,8 +24,8 @@ func (cfg Config) databaseRoomToRoom(room *database.Room) Room {
 	return Room{
 		Id:        room.Id,
 		Number:    room.Number,
-		CheckedIn: room.CheckedIn,
 		Capacity:  room.Capacity,
+		CheckedIn: room.CheckedIn,
 		PlaceId:   room.PlaceId,
 		IsClean:   &room.IsClean,
 	}
@@ -38,8 +38,8 @@ func (cfg Config) databaseRoomsToRooms(dbRooms []database.Room) []Room {
 		rooms = append(rooms, Room{
 			Id:        room.Id,
 			Number:    room.Number,
-			CheckedIn: room.CheckedIn,
 			Capacity:  room.Capacity,
+			CheckedIn: room.CheckedIn,
 			PlaceId:   room.PlaceId,
 			IsClean:   &room.IsClean,
 		})

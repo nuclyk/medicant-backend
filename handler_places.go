@@ -69,9 +69,9 @@ func (cfg Config) handlerPlaceGet(w http.ResponseWriter, r *http.Request, validU
 			return
 		}
 
-		respondWithJson(w, http.StatusFound, cfg.databasePlaceToPlace(&result))
+		respondWithJson(w, http.StatusOK, cfg.databasePlaceToPlace(&result))
 	} else {
-		msg := "place name can't be empty"
+		msg := "Place ID can't be empty"
 		respondWithError(w, http.StatusInternalServerError, msg, errors.New(msg))
 		return
 	}
@@ -82,21 +82,21 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 
 	if !validUser.Editor {
 		err := errors.New("wrong user or role")
-		respondWithError(w, http.StatusUnauthorized, "wrong user or role", err)
+		respondWithError(w, http.StatusUnauthorized, "Wrong User or Role", err)
 		return
 	}
 
 	var params Place
 
 	if id == "" {
-		respondWithError(w, http.StatusBadRequest, "provide name of the place", fmt.Errorf("id empty"))
+		respondWithError(w, http.StatusBadRequest, "Provide name of the place", fmt.Errorf("id empty"))
 		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error when decoding the json", err)
+		respondWithError(w, http.StatusInternalServerError, "Error when decoding the json", err)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 	place, err := cfg.db.GetPlace(parsedId)
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't find place", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't find place", err)
 		return
 
 	}
@@ -133,7 +133,7 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 	result, err := cfg.db.UpdatePlace(id, place)
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error when updating", err)
+		respondWithError(w, http.StatusInternalServerError, "Error when updating a place", err)
 		return
 	}
 

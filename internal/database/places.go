@@ -127,7 +127,7 @@ const updatePlace = `
 	  name = ?,
 	  room = ?,
 	  capacity = ?,
-	  is_clean = ?,
+	  is_clean = ?
 	WHERE
 	  id = ? 
 	RETURNING 

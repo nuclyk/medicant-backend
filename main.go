@@ -112,21 +112,24 @@ func main() {
 
 	// Retreat Handlers
 	mux.HandleFunc("POST /api/retreats", cfg.JWTAuth(cfg.handlerRetreatsCreate))
-	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatGet))
 	mux.HandleFunc("GET /api/retreats", cfg.handlerRetreatsGet)
+	mux.HandleFunc("GET /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatGet))
 	mux.HandleFunc("PUT /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatUpdate))
 	mux.HandleFunc("DELETE /api/retreats/{retreatID}", cfg.JWTAuth(cfg.handlerRetreatDelete))
 
 	// Place handlers
 	mux.HandleFunc("POST /api/places", cfg.JWTAuth(cfg.handlerPlacesCreate))
-	mux.HandleFunc("GET /api/places/{id}", cfg.JWTAuth(cfg.handlerPlaceGet))
 	mux.HandleFunc("GET /api/places", cfg.handlerPlacesGet)
+	mux.HandleFunc("GET /api/places/{id}", cfg.JWTAuth(cfg.handlerPlaceGet))
 	mux.HandleFunc("PUT /api/places/{id}", cfg.JWTAuth(cfg.handlerPlacesUpdate))
 	mux.HandleFunc("DELETE /api/places/{id}", cfg.JWTAuth(cfg.handlerPlacesDelete))
 
 	// Room handlers
 	mux.HandleFunc("POST /api/rooms", cfg.JWTAuth(cfg.handlerRoomsCreate))
 	mux.HandleFunc("GET /api/rooms", cfg.JWTAuth(cfg.handlerRoomsGet))
+	mux.HandleFunc("GET /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomGet))
+	mux.HandleFunc("PUT /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomsUpdate))
+	mux.HandleFunc("DELETE /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomsUpdate))
 
 	// Refresh Tokens
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)

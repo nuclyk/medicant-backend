@@ -1,5 +1,7 @@
 package database
 
+import "fmt"
+
 type Room struct {
 	Id int
 	CreateRoomParams
@@ -15,7 +17,7 @@ type CreateRoomParams struct {
 
 const createRoom = `
 	INSERT INTO
-	  rooms (number, capacity, place_id)
+	  rooms (number, capacity, place_id
 	VALUES
 	  (?, ?, ?)
 	`
@@ -53,8 +55,8 @@ func (c Client) GetRoom(id int) (*Room, error) {
 	if err := c.db.QueryRow(getRoom, id).Scan(
 		&room.Id,
 		&room.Number,
-		&room.CheckedIn,
 		&room.Capacity,
+		&room.CheckedIn,
 		&room.PlaceId,
 		&room.IsClean,
 	); err != nil {
@@ -83,8 +85,8 @@ func (c Client) GetRooms() (*[]Room, error) {
 		if err := rows.Scan(
 			&room.Id,
 			&room.Number,
-			&room.CheckedIn,
 			&room.Capacity,
+			&room.CheckedIn,
 			&room.PlaceId,
 			&room.IsClean,
 		); err != nil {
@@ -103,4 +105,73 @@ func (c Client) GetRooms() (*[]Room, error) {
 	}
 
 	return &rooms, nil
+}
+
+const updateRoom = `
+	UPDATE rooms
+	SET
+		number = ?,
+		capacity = ?,
+		checked_in = ?,
+		place_id = ?,
+		is_clean = ?
+	WHERE
+		id = ?
+	RETURNING
+		id,
+		number,
+		capacity,
+		checked_in,
+		place_id,
+		is_clean
+	`
+
+func (c Client) UpdateRoom(id string, params Room) (*Room, error) {
+	c.log.Printf("Updating room number: %v", params.Number)
+
+	row := c.db.QueryRow(
+		updateRoom,
+		params.Number,
+		params.Capacity,
+		params.CheckedIn,
+		params.PlaceId,
+		params.IsClean,
+		id,
+	)
+
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var room Room
+
+	if err := row.Scan(
+		&room.Id,
+		&room.Number,
+		&room.Capacity,
+		&room.CheckedIn,
+		&room.PlaceId,
+		&room.IsClean,
+	); err != nil {
+		return nil, err
+	}
+
+	return &room, nil
+}
+
+const deleteRoom = `
+	DELETE FROM rooms
+	WHERE id = ?;
+	`
+
+func (c Client) DeleteRoom(id string) (string, error) {
+	c.log.Printf("Deleting room number: %s", id)
+
+	_, err := c.db.Exec(deleteRoom, id)
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Place `%s` was deleted", id), nil
 }
