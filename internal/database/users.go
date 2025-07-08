@@ -33,6 +33,7 @@ type CreateUserParams struct {
 	LeaveDate    sql.NullTime
 	Diet         sql.NullString
 	Place        int
+	RoomId       *int
 	IsCheckedIn  bool
 	Donation     int
 }
@@ -57,10 +58,11 @@ const createUser = `
 		retreat_id,
 		leave_date,
 		diet,
-		place
+		place,
+		room_id
 	  )
 	VALUES
-	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `
 
 func (c Client) CreateUser(params CreateUserParams) (*User, error) {
@@ -83,6 +85,7 @@ func (c Client) CreateUser(params CreateUserParams) (*User, error) {
 		params.LeaveDate,
 		params.Diet,
 		params.Place,
+		params.RoomId,
 	)
 
 	if err != nil {
@@ -118,6 +121,7 @@ const getUser = `
       leave_date,
 	  diet,
 	  place,
+	  room_id,
 	  is_checked_in,
 	  donation
     FROM
@@ -153,6 +157,7 @@ func (c Client) GetUser(searchValue string) (*User, error) {
 		&user.LeaveDate,
 		&user.Diet,
 		&user.Place,
+		&user.RoomId,
 		&user.IsCheckedIn,
 		&user.Donation,
 	); err != nil {
@@ -205,6 +210,7 @@ const getUsers = `
 	  leave_date,
 	  diet,
 	  place,
+	  room_id,
 	  is_checked_in,
 	  donation
     FROM
@@ -244,6 +250,7 @@ func (c Client) GetUsers() ([]User, error) {
 			&user.LeaveDate,
 			&user.Diet,
 			&user.Place,
+			&user.RoomId,
 			&user.IsCheckedIn,
 			&user.Donation,
 		); err != nil {
@@ -359,6 +366,7 @@ const updateUser = `
       leave_date = ?,
       diet = ?,
       place = ?,
+      room_id = ?,
       is_checked_in = ?,
 	  donation = ?
     WHERE
@@ -381,6 +389,7 @@ const updateUser = `
       leave_date,
 	  diet,
 	  place,
+	  room_id,
 	  is_checked_in,
 	  donation
     `
@@ -404,6 +413,7 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		params.LeaveDate,
 		params.Diet,
 		params.Place,
+		params.RoomId,
 		params.IsCheckedIn,
 		params.Donation,
 		id,
@@ -433,6 +443,7 @@ func (c Client) UpdateUser(id string, params *User) (*User, error) {
 		&user.LeaveDate,
 		&user.Diet,
 		&user.Place,
+		&user.RoomId,
 		&user.IsCheckedIn,
 		&user.Donation,
 	); err != nil {

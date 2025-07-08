@@ -5,24 +5,21 @@ import (
 )
 
 type Place struct {
-	Id       int
-	Name     string
-	Room     string
-	Capacity string
-	IsClean  bool
+	Id   int
+	Name string
 }
 
 const createPlace = `
 	INSERT INTO
-	  places (name, room, capacity)
+	  places (name)
 	VALUES
-	  (?, ?, ?);
+	  (?)
 	`
 
 func (c Client) CreatePlace(params Place) (*Place, error) {
 	c.log.Println("Creating new place")
 
-	result, err := c.db.Exec(createPlace, params.Name, params.Room, params.Capacity)
+	result, err := c.db.Exec(createPlace, params.Name)
 
 	if err != nil {
 		return nil, err
@@ -41,10 +38,7 @@ func (c Client) CreatePlace(params Place) (*Place, error) {
 const getPlace = `
 	SELECT
 	  id,
-	  name,
-	  room,
-	  capacity,
-	  is_clean
+	  name
 	FROM
 	  places
 	WHERE
@@ -59,9 +53,6 @@ func (c Client) GetPlace(id int) (Place, error) {
 	err := c.db.QueryRow(getPlace, id).Scan(
 		&place.Id,
 		&place.Name,
-		&place.Room,
-		&place.Capacity,
-		&place.IsClean,
 	)
 
 	if err != nil {
@@ -74,10 +65,7 @@ func (c Client) GetPlace(id int) (Place, error) {
 const getPlaces = `
 	SELECT
 	  id,
-	  name,
-	  room,
-	  capacity,
-	  is_clean
+	  name
 	FROM
 	  places;
 	`
@@ -100,9 +88,6 @@ func (c Client) GetPlaces() ([]Place, error) {
 		if err := rows.Scan(
 			&place.Id,
 			&place.Name,
-			&place.Room,
-			&place.Capacity,
-			&place.IsClean,
 		); err != nil {
 			return nil, err
 		}
@@ -124,18 +109,12 @@ func (c Client) GetPlaces() ([]Place, error) {
 const updatePlace = `
 	UPDATE places
 	SET
-	  name = ?,
-	  room = ?,
-	  capacity = ?,
-	  is_clean = ?
+	  name = ?
 	WHERE
 	  id = ? 
 	RETURNING 
 	  id,
 	  name,
-	  room,
-	  capacity,
-	  is_clean
 	`
 
 func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
@@ -144,9 +123,6 @@ func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 	row := c.db.QueryRow(
 		updatePlace,
 		params.Name,
-		params.Room,
-		params.Capacity,
-		params.IsClean,
 		id,
 	)
 
@@ -159,9 +135,6 @@ func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
 	if err := row.Scan(
 		&place.Id,
 		&place.Name,
-		&place.Room,
-		&place.Capacity,
-		&place.IsClean,
 	); err != nil {
 		return nil, err
 	}

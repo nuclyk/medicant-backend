@@ -118,18 +118,6 @@ func (cfg Config) handlerPlacesUpdate(w http.ResponseWriter, r *http.Request, va
 		place.Name = params.Name
 	}
 
-	if params.Room != "" {
-		place.Room = params.Room
-	}
-
-	if params.Capacity != "" {
-		place.Capacity = params.Capacity
-	}
-
-	if params.IsClean != nil {
-		place.IsClean = *params.IsClean
-	}
-
 	result, err := cfg.db.UpdatePlace(id, place)
 
 	if err != nil {

@@ -50,20 +50,14 @@ func (cfg Config) databaseRoomsToRooms(dbRooms []database.Room) []Room {
 
 // Place model --------------------------------
 type Place struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Room     string `json:"room"`
-	Capacity string `json:"capacity"`
-	IsClean  *bool  `json:"is_clean"`
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 func (cfg Config) databasePlaceToPlace(place *database.Place) Place {
 	return Place{
-		Id:       place.Id,
-		Name:     place.Name,
-		Room:     place.Room,
-		Capacity: place.Capacity,
-		IsClean:  &place.IsClean,
+		Id:   place.Id,
+		Name: place.Name,
 	}
 }
 
@@ -72,11 +66,8 @@ func (cfg Config) databasePlacesToPlaces(dbPlaces []database.Place) []Place {
 
 	for _, place := range dbPlaces {
 		places = append(places, Place{
-			Id:       place.Id,
-			Name:     place.Name,
-			Room:     place.Room,
-			Capacity: place.Capacity,
-			IsClean:  &place.IsClean,
+			Id:   place.Id,
+			Name: place.Name,
 		})
 	}
 
@@ -126,6 +117,7 @@ type User struct {
 	LeaveDate    time.Time `json:"leave_date"`
 	Diet         string    `json:"diet"`
 	Place        int       `json:"place"`
+	RoomId       *int      `json:"room_id"`
 	IsCheckedIn  bool      `json:"is_checked_in"`
 	Donation     int       `json:"donation"`
 }
@@ -149,6 +141,7 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		LeaveDate:    user.LeaveDate.Time,
 		Diet:         user.Diet.String,
 		Place:        user.Place,
+		RoomId:       user.RoomId,
 		IsCheckedIn:  user.IsCheckedIn,
 		Donation:     user.Donation,
 	}
@@ -176,6 +169,7 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			LeaveDate:    user.LeaveDate.Time,
 			Diet:         user.Diet.String,
 			Place:        user.Place,
+			RoomId:       user.RoomId,
 			IsCheckedIn:  user.IsCheckedIn,
 			Donation:     user.Donation,
 		})

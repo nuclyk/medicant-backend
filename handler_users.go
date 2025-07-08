@@ -28,7 +28,8 @@ type CreateUserParams struct {
 	CheckOutDate string `json:"check_out_date,omitempty"`
 	LeaveDate    string `json:"leave_date,omitempty"`
 	Diet         string `json:"diet,omitempty"`
-	Place        int    `json:"place,omitempty"`
+	Place        *int   `json:"place,omitempty"`
+	RoomId       *int   `json:"room_id,omitempty"`
 	IsCheckedIn  *bool  `json:"is_checked_in,omitempty"`
 	Donation     *int   `json:"donation,omitempty"`
 	Reset        bool   `json:"reset,omitempty"`
@@ -115,7 +116,8 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		CheckOutDate: checkOutDate,
 		LeaveDate:    leaveDate,
 		Diet:         diet,
-		Place:        params.Place,
+		Place:        *params.Place,
+		RoomId:       params.RoomId,
 	})
 
 	if err != nil {
@@ -366,8 +368,12 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 		user.Diet.Valid = true
 	}
 
-	if params.Place != 0 {
-		user.Place = params.Place
+	if params.Place != nil {
+		user.Place = *params.Place
+	}
+
+	if params.RoomId != nil {
+		user.RoomId = params.RoomId
 	}
 
 	// IsCheckedIn is a pointer to check fo nil value first
