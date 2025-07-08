@@ -339,7 +339,9 @@ func (c Client) UpdatePassword(id string, password UpdatePasswordParams) (string
 const checkoutUser = `UPDATE users 
 	SET 
 	  check_out_date = datetime('now'), 
-	  is_checked_in = 0 
+	  is_checked_in = 0,
+	  place = 1,
+	  room_id = 0
 	WHERE email = ?;`
 
 func (c Client) CheckoutUser(email string) error {
