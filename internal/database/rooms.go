@@ -17,7 +17,7 @@ type CreateRoomParams struct {
 
 const createRoom = `
 	INSERT INTO
-	  rooms (number, capacity, place_id
+	  rooms (number, capacity, place_id)
 	VALUES
 	  (?, ?, ?)
 	`

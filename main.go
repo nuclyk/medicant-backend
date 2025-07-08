@@ -129,7 +129,7 @@ func main() {
 	mux.HandleFunc("GET /api/rooms", cfg.JWTAuth(cfg.handlerRoomsGet))
 	mux.HandleFunc("GET /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomGet))
 	mux.HandleFunc("PUT /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomsUpdate))
-	mux.HandleFunc("DELETE /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomsUpdate))
+	mux.HandleFunc("DELETE /api/rooms/{id}", cfg.JWTAuth(cfg.handlerRoomsDelete))
 
 	// Refresh Tokens
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)
