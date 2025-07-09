@@ -20,24 +20,24 @@ type Config struct {
 var cfg Config
 
 func main() {
-	err := godotenv.Load(".env")
+	var envFile string
+
+	if len(os.Args) > 1 && os.Args[1] == "dev" {
+		log.Println(".env.dev loaded")
+		envFile = ".env.dev"
+	} else {
+		log.Println(".env loaded")
+		envFile = ".env"
+	}
+
+	err := godotenv.Load(envFile)
 	if err != nil {
 		log.Printf("Error loading .env file: %v", err)
 	}
 
-	tursoRemote := os.Getenv("TURSO_DATABASE_URL")
-	if tursoRemote == "" {
-		log.Println("Turso database url has to be set in .env")
-	}
-
-	tursoDev := os.Getenv("TURSO_DEV")
-	if tursoDev == "" {
-		log.Println("Turso database url has to be set in .env")
-	}
-
-	tursoLocal := os.Getenv("TURSO_LOCAL")
-	if tursoLocal == "" {
-		log.Println("Turso local database url has to be set in .env")
+	turso := os.Getenv("TURSO")
+	if turso == "" {
+		log.Println("Turso database url has to be set")
 	}
 
 	port := os.Getenv("PORT")
@@ -55,16 +55,8 @@ func main() {
 		log.Println("Assets root has to be set")
 	}
 
-	var dbURL string
-	if len(os.Args) > 1 && os.Args[1] == "dev" {
-		log.Print("Running in dev mode")
-		dbURL = tursoDev
-	} else {
-		dbURL = tursoRemote
-	}
-
 	// Create new DB
-	dbClient, err := database.NewClient(dbURL)
+	dbClient, err := database.NewClient(turso)
 	if err != nil {
 		log.Fatalf("couldn't create new database client: %v", err)
 	}
@@ -137,6 +129,9 @@ func main() {
 
 	// Auth
 	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
+
+	// Stats
+	mux.HandleFunc("GET /api/stats", cfg.handlerStatsGet)
 
 	// QR codes
 	mux.HandleFunc("POST /api/qrcode", cfg.JWTAuth(cfg.handlerQrcode))

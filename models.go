@@ -10,6 +10,28 @@ import (
 	"github.com/nuclyk/medicant/internal/database"
 )
 
+type Stats struct {
+	CheckedIn    int `json:"checked_in"`
+	ArrivedToday int `json:"arrived_today"`
+	LeavingToday int `json:"leaving_today"`
+	Males        int `json:"males"`
+	Females      int `json:"females"`
+	Vegetarian   int `json:"vegetarian"`
+	Volunteers   int `json:"volunteers"`
+}
+
+func (cfg Config) dbStatsToStats(stats *database.Stats) Stats {
+	return Stats{
+		CheckedIn:    stats.CheckedIn,
+		ArrivedToday: stats.ArrivedToday,
+		LeavingToday: stats.LeavingToday,
+		Males:        stats.Males,
+		Females:      stats.Females,
+		Vegetarian:   stats.Vegetarian,
+		Volunteers:   stats.Volunteers,
+	}
+}
+
 // Room model --------------------------------
 type Room struct {
 	Id        int   `json:"id"`
