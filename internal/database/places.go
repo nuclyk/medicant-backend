@@ -114,7 +114,7 @@ const updatePlace = `
 	  id = ? 
 	RETURNING 
 	  id,
-	  name,
+	  name
 	`
 
 func (c Client) UpdatePlace(id string, params Place) (*Place, error) {
