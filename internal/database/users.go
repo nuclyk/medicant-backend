@@ -28,9 +28,9 @@ type CreateUserParams struct {
 	Nationality  string
 	Role         string
 	RetreatID    int
-	CheckInDate  sql.NullTime
-	CheckOutDate sql.NullTime
-	LeaveDate    sql.NullTime
+	CheckInDate  *time.Time
+	CheckOutDate *time.Time
+	LeaveDate    *time.Time
 	Diet         sql.NullString
 	Place        int
 	RoomId       *int
