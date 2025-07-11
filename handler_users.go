@@ -14,25 +14,25 @@ import (
 )
 
 type CreateUserParams struct {
-	FirstName    string `json:"first_name,omitempty"`
-	LastName     string `json:"last_name,omitempty"`
-	Email        string `json:"email,omitempty"`
-	Password     string `json:"password,omitempty"`
-	Phone        string `json:"phone,omitempty"`
-	Age          string `json:"age,omitempty"`
-	Gender       string `json:"gender,omitempty"`
-	Nationality  string `json:"nationality,omitempty"`
-	Role         string `json:"role,omitempty"`
-	RetreatID    int    `json:"retreat_id,omitempty"`
-	CheckInDate  string `json:"check_in_date,omitempty"`
-	CheckOutDate string `json:"check_out_date,omitempty"`
-	LeaveDate    string `json:"leave_date,omitempty"`
-	Diet         string `json:"diet,omitempty"`
-	Place        *int   `json:"place,omitempty"`
-	RoomId       *int   `json:"room_id,omitempty"`
-	IsCheckedIn  *bool  `json:"is_checked_in,omitempty"`
-	Donation     *int   `json:"donation,omitempty"`
-	Reset        bool   `json:"reset,omitempty"`
+	FirstName    string     `json:"first_name,omitempty"`
+	LastName     string     `json:"last_name,omitempty"`
+	Email        string     `json:"email,omitempty"`
+	Password     string     `json:"password,omitempty"`
+	Phone        string     `json:"phone,omitempty"`
+	Age          string     `json:"age,omitempty"`
+	Gender       string     `json:"gender,omitempty"`
+	Nationality  string     `json:"nationality,omitempty"`
+	Role         string     `json:"role,omitempty"`
+	RetreatID    int        `json:"retreat_id,omitempty"`
+	CheckInDate  *time.Time `json:"check_in_date,omitempty"`
+	CheckOutDate *time.Time `json:"check_out_date,omitempty"`
+	LeaveDate    *time.Time `json:"leave_date,omitempty"`
+	Diet         string     `json:"diet,omitempty"`
+	Place        *int       `json:"place,omitempty"`
+	RoomId       *int       `json:"room_id,omitempty"`
+	IsCheckedIn  *bool      `json:"is_checked_in,omitempty"`
+	Donation     *int       `json:"donation,omitempty"`
+	Reset        bool       `json:"reset,omitempty"`
 }
 
 func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
@@ -72,29 +72,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Dealing with null time values
-	var checkInDate sql.NullTime
-	var checkOutDate sql.NullTime
-	var leaveDate sql.NullTime
 	var diet sql.NullString
-
-	if params.CheckInDate != "" {
-		time, _ := time.Parse(time.RFC1123, params.CheckInDate)
-		checkInDate.Time = time
-		checkInDate.Valid = true
-	}
-
-	if params.CheckOutDate != "" {
-		time, _ := time.Parse(time.RFC1123, params.CheckOutDate)
-		checkOutDate.Time = time
-		checkOutDate.Valid = true
-	}
-
-	if params.LeaveDate != "" {
-		time, _ := time.Parse("2006-01-02", params.LeaveDate)
-		leaveDate.Time = time
-		leaveDate.Valid = true
-	}
 
 	if params.Diet != "" {
 		diet.String = params.Diet
@@ -112,9 +90,9 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		Nationality:  params.Nationality,
 		Role:         params.Role,
 		RetreatID:    params.RetreatID,
-		CheckInDate:  checkInDate,
-		CheckOutDate: checkOutDate,
-		LeaveDate:    leaveDate,
+		CheckInDate:  params.CheckInDate,
+		CheckOutDate: params.CheckOutDate,
+		LeaveDate:    params.LeaveDate,
 		Diet:         diet,
 		Place:        *params.Place,
 		RoomId:       params.RoomId,
@@ -329,38 +307,23 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 		user.RetreatID = params.RetreatID
 	}
 
-	if params.CheckInDate != "" {
-		parsedDate, err := time.Parse(time.RFC3339, params.CheckInDate)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Error when parsing check in date", err)
-			return
-		}
-		user.CheckInDate = sql.NullTime{Time: parsedDate, Valid: true}
+	if params.CheckInDate != nil {
+		user.CheckInDate = params.CheckInDate
 	}
 
-	if params.CheckOutDate != "" {
-		parsedDate, err := time.Parse(time.RFC3339, params.CheckOutDate)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Error when parsing check out date", err)
-			return
-		}
-		user.CheckOutDate = sql.NullTime{Time: parsedDate, Valid: true}
+	if params.CheckOutDate != nil {
+		user.CheckOutDate = params.CheckOutDate
+	}
+
+	if params.LeaveDate != nil {
+		user.LeaveDate = params.LeaveDate
 	}
 
 	// For the returning participants, if they use the same email,
 	// we needto reset their check-out date.
 	if params.Reset {
-		user.CheckOutDate = sql.NullTime{Time: time.Time{}, Valid: false}
+		user.CheckOutDate = nil
 		user.IsCheckedIn = true
-	}
-
-	if params.LeaveDate != "" {
-		parsedDate, err := time.Parse("2006-01-02", params.LeaveDate)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Error when parsing leave date", err)
-			return
-		}
-		user.LeaveDate = sql.NullTime{Time: parsedDate, Valid: true}
 	}
 
 	if params.Diet != "" {

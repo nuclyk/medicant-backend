@@ -122,26 +122,26 @@ func (cfg Config) databaseRolesToRoles(dbRoles []database.Role) []Role {
 // User model --------------------------------
 
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	Created_at   time.Time `json:"created_at"`
-	Updated_at   time.Time `json:"updated_at"`
-	FirstName    string    `json:"first_name"`
-	LastName     string    `json:"last_name"`
-	Email        string    `json:"email"`
-	Phone        string    `json:"phone"`
-	Age          string    `json:"age"`
-	Gender       string    `json:"gender"`
-	Nationality  string    `json:"nationality"`
-	Role         string    `json:"role"`
-	RetreatID    int       `json:"retreat_id"`
-	CheckInDate  time.Time `json:"check_in_date"`
-	CheckOutDate time.Time `json:"check_out_date"`
-	LeaveDate    time.Time `json:"leave_date"`
-	Diet         string    `json:"diet"`
-	Place        int       `json:"place"`
-	RoomId       *int      `json:"room_id"`
-	IsCheckedIn  bool      `json:"is_checked_in"`
-	Donation     int       `json:"donation"`
+	ID           uuid.UUID  `json:"id"`
+	Created_at   time.Time  `json:"created_at"`
+	Updated_at   time.Time  `json:"updated_at"`
+	FirstName    string     `json:"first_name"`
+	LastName     string     `json:"last_name"`
+	Email        string     `json:"email"`
+	Phone        string     `json:"phone"`
+	Age          string     `json:"age"`
+	Gender       string     `json:"gender"`
+	Nationality  string     `json:"nationality"`
+	Role         string     `json:"role"`
+	RetreatID    int        `json:"retreat_id"`
+	CheckInDate  *time.Time `json:"check_in_date"`
+	CheckOutDate *time.Time `json:"check_out_date"`
+	LeaveDate    *time.Time `json:"leave_date"`
+	Diet         string     `json:"diet"`
+	Place        int        `json:"place"`
+	RoomId       *int       `json:"room_id"`
+	IsCheckedIn  bool       `json:"is_checked_in"`
+	Donation     int        `json:"donation"`
 }
 
 func (cfg Config) databaseUserToUser(user *database.User) User {
@@ -158,9 +158,9 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		Nationality:  user.Nationality,
 		Role:         user.Role,
 		RetreatID:    user.RetreatID,
-		CheckInDate:  user.CheckInDate.Time,
-		CheckOutDate: user.CheckOutDate.Time,
-		LeaveDate:    user.LeaveDate.Time,
+		CheckInDate:  user.CheckInDate,
+		CheckOutDate: user.CheckOutDate,
+		LeaveDate:    user.LeaveDate,
 		Diet:         user.Diet.String,
 		Place:        user.Place,
 		RoomId:       user.RoomId,
@@ -186,9 +186,9 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			Nationality:  user.Nationality,
 			Role:         user.Role,
 			RetreatID:    user.RetreatID,
-			CheckInDate:  user.CheckInDate.Time,
-			CheckOutDate: user.CheckOutDate.Time,
-			LeaveDate:    user.LeaveDate.Time,
+			CheckInDate:  user.CheckInDate,
+			CheckOutDate: user.CheckOutDate,
+			LeaveDate:    user.LeaveDate,
 			Diet:         user.Diet.String,
 			Place:        user.Place,
 			RoomId:       user.RoomId,
