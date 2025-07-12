@@ -1,10 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -13,9 +11,9 @@ import (
 )
 
 type CreateRetreatParams struct {
-	Type       string `json:"type"`
-	Start_date string `json:"start_date"`
-	End_date   string `json:"end_date"`
+	Type       string     `json:"type,omitempty"`
+	Start_date *time.Time `json:"start_date,omitempty"`
+	End_date   *time.Time `json:"end_date,omitempty"`
 }
 
 func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
@@ -40,25 +38,10 @@ func (cfg Config) handlerRetreatsCreate(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	var startDate sql.NullTime
-	var endDate sql.NullTime
-
-	if params.Start_date != "" {
-		time, _ := time.Parse("2006-01-02", params.Start_date)
-		startDate.Time = time
-		startDate.Valid = true
-	}
-
-	if params.End_date != "" {
-		time, _ := time.Parse("2006-01-02", params.End_date)
-		endDate.Time = time
-		endDate.Valid = true
-	}
-
 	retreat, err := cfg.db.CreateRetreat(database.CreateRetreatParams{
 		Type:       params.Type,
-		Start_date: startDate,
-		End_date:   endDate,
+		Start_date: params.Start_date,
+		End_date:   params.End_date,
 	})
 
 	if err != nil {
@@ -133,28 +116,12 @@ func (cfg Config) handlerRetreatUpdate(w http.ResponseWriter, r *http.Request, v
 		retreat.Type = params.Type
 	}
 
-	if params.Start_date != "" {
-		parsedDate, err := time.Parse("2006-01-02", params.Start_date)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Error when parsing start date of the retreat", err)
-			return
-		}
-		retreat.Start_date = sql.NullTime{Time: parsedDate, Valid: true}
-
-		// If the start date is changed, change retreat code as well
-		day := parsedDate.Day()
-		month := parsedDate.Month()
-
-		retreat.RetreatCode = fmt.Sprintf("%s-%v-%v", retreat.Type[:3], day, month)
+	if params.Start_date != nil {
+		retreat.Start_date = params.Start_date
 	}
 
-	if params.End_date != "" {
-		parsedDate, err := time.Parse("2006-01-02", params.End_date)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Error when parsing end date of the retreat", err)
-			return
-		}
-		retreat.End_date = sql.NullTime{Time: parsedDate, Valid: true}
+	if params.End_date != nil {
+		retreat.End_date = params.End_date
 	}
 
 	updatedRetreat, err := cfg.db.UpdateRetreat(retreatID, *retreat)

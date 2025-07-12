@@ -137,7 +137,7 @@ type User struct {
 	CheckInDate  *time.Time `json:"check_in_date"`
 	CheckOutDate *time.Time `json:"check_out_date"`
 	LeaveDate    *time.Time `json:"leave_date"`
-	Diet         string     `json:"diet"`
+	Diet         *string    `json:"diet"`
 	Place        int        `json:"place"`
 	RoomId       *int       `json:"room_id"`
 	IsCheckedIn  bool       `json:"is_checked_in"`
@@ -161,7 +161,7 @@ func (cfg Config) databaseUserToUser(user *database.User) User {
 		CheckInDate:  user.CheckInDate,
 		CheckOutDate: user.CheckOutDate,
 		LeaveDate:    user.LeaveDate,
-		Diet:         user.Diet.String,
+		Diet:         user.Diet,
 		Place:        user.Place,
 		RoomId:       user.RoomId,
 		IsCheckedIn:  user.IsCheckedIn,
@@ -189,7 +189,7 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 			CheckInDate:  user.CheckInDate,
 			CheckOutDate: user.CheckOutDate,
 			LeaveDate:    user.LeaveDate,
-			Diet:         user.Diet.String,
+			Diet:         user.Diet,
 			Place:        user.Place,
 			RoomId:       user.RoomId,
 			IsCheckedIn:  user.IsCheckedIn,
@@ -201,13 +201,13 @@ func (cfg Config) databaseUsersToUsers(dbUsers []database.User) []User {
 }
 
 type Retreat struct {
-	ID          int       `json:"id"`
-	RetreatCode string    `json:"retreat_code"`
-	Created_at  string    `json:"created_at"`
-	Updated_at  string    `json:"updated_at"`
-	Type        string    `json:"type"`
-	Start_date  time.Time `json:"start_date"`
-	End_date    time.Time `json:"end_date"`
+	ID          int        `json:"id"`
+	RetreatCode string     `json:"retreat_code"`
+	Created_at  string     `json:"created_at"`
+	Updated_at  string     `json:"updated_at"`
+	Type        string     `json:"type"`
+	Start_date  *time.Time `json:"start_date"`
+	End_date    *time.Time `json:"end_date"`
 }
 
 func (cfg Config) databaseRetreatToRetreat(retreat *database.Retreat) Retreat {
@@ -217,8 +217,8 @@ func (cfg Config) databaseRetreatToRetreat(retreat *database.Retreat) Retreat {
 		Created_at:  retreat.Created_at.String(),
 		Updated_at:  retreat.Updated_at.String(),
 		Type:        retreat.Type,
-		Start_date:  retreat.Start_date.Time,
-		End_date:    retreat.End_date.Time,
+		Start_date:  retreat.Start_date,
+		End_date:    retreat.End_date,
 	}
 }
 
@@ -232,8 +232,8 @@ func (cfg Config) databaseRetreatsToRetreats(dbRetreats []database.Retreat) []Re
 			Created_at:  retreat.Created_at.String(),
 			Updated_at:  retreat.Updated_at.String(),
 			Type:        retreat.Type,
-			Start_date:  retreat.Start_date.Time,
-			End_date:    retreat.End_date.Time,
+			Start_date:  retreat.Start_date,
+			End_date:    retreat.End_date,
 		})
 	}
 

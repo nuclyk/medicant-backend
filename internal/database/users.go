@@ -31,7 +31,7 @@ type CreateUserParams struct {
 	CheckInDate  *time.Time
 	CheckOutDate *time.Time
 	LeaveDate    *time.Time
-	Diet         sql.NullString
+	Diet         *string
 	Place        int
 	RoomId       *int
 	IsCheckedIn  bool
