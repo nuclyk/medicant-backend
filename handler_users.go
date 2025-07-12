@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,7 +26,7 @@ type CreateUserParams struct {
 	CheckInDate  *time.Time `json:"check_in_date,omitempty"`
 	CheckOutDate *time.Time `json:"check_out_date,omitempty"`
 	LeaveDate    *time.Time `json:"leave_date,omitempty"`
-	Diet         string     `json:"diet,omitempty"`
+	Diet         *string    `json:"diet,omitempty"`
 	Place        *int       `json:"place,omitempty"`
 	RoomId       *int       `json:"room_id,omitempty"`
 	IsCheckedIn  *bool      `json:"is_checked_in,omitempty"`
@@ -72,13 +71,6 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var diet sql.NullString
-
-	if params.Diet != "" {
-		diet.String = params.Diet
-		diet.Valid = true
-	}
-
 	user, err := cfg.db.CreateUser(database.CreateUserParams{
 		FirstName:    params.FirstName,
 		LastName:     params.LastName,
@@ -93,7 +85,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		CheckInDate:  params.CheckInDate,
 		CheckOutDate: params.CheckOutDate,
 		LeaveDate:    params.LeaveDate,
-		Diet:         diet,
+		Diet:         params.Diet,
 		Place:        *params.Place,
 		RoomId:       params.RoomId,
 	})
@@ -326,9 +318,8 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 		user.IsCheckedIn = true
 	}
 
-	if params.Diet != "" {
-		user.Diet.String = params.Diet
-		user.Diet.Valid = true
+	if params.Diet != nil {
+		user.Diet = params.Diet
 	}
 
 	if params.Place != nil {

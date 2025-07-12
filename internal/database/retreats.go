@@ -1,8 +1,9 @@
 package database
 
 import (
-	"database/sql"
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"strconv"
 	"time"
 )
@@ -17,8 +18,8 @@ type Retreat struct {
 
 type CreateRetreatParams struct {
 	Type       string
-	Start_date sql.NullTime
-	End_date   sql.NullTime
+	Start_date *time.Time
+	End_date   *time.Time
 }
 
 const createRetreat = `
@@ -36,10 +37,13 @@ const createRetreat = `
 func (c Client) CreateRetreat(params CreateRetreatParams) (*Retreat, error) {
 	c.log.Println("Creating new retreat")
 
-	day := params.Start_date.Time.Day()
-	month := params.Start_date.Time.Month()
+	n, err := rand.Int(rand.Reader, big.NewInt(10000))
+	if err != nil {
+		return nil, err
+	}
+	num := n.Int64()
 
-	retreat_code := fmt.Sprintf("%s-%v-%v", params.Type[:3], day, month)
+	retreat_code := fmt.Sprintf("%s-%v", params.Type[:3], num)
 
 	result, err := c.db.Exec(createRetreat,
 		retreat_code,
