@@ -1,8 +1,9 @@
 package database
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strconv"
 	"time"
 )
@@ -36,7 +37,13 @@ const createRetreat = `
 func (c Client) CreateRetreat(params CreateRetreatParams) (*Retreat, error) {
 	c.log.Println("Creating new retreat")
 
-	retreat_code := fmt.Sprintf("%s-%v", params.Type[:3], rand.Intn(1000))
+	n, err := rand.Int(rand.Reader, big.NewInt(10000))
+	if err != nil {
+		return nil, err
+	}
+	num := n.Int64()
+
+	retreat_code := fmt.Sprintf("%s-%v", params.Type[:3], num)
 
 	result, err := c.db.Exec(createRetreat,
 		retreat_code,
