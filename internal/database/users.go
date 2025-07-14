@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -214,13 +215,19 @@ const getUsers = `
 	  is_checked_in,
 	  donation
     FROM
-      users;
+      users
     `
 
-func (c Client) GetUsers() ([]User, error) {
+func (c Client) GetUsers(option string) ([]User, error) {
 	c.log.Println("Getting all users")
 
-	rows, err := c.db.Query(getUsers)
+	query := getUsers
+
+	if option == "checkedin" {
+		query = query + "WHERE is_checked_in = 1"
+	}
+
+	rows, err := c.db.Query(query)
 
 	if err != nil {
 		return nil, err
@@ -345,8 +352,21 @@ const checkoutUser = `UPDATE users
 	WHERE email = ?;`
 
 func (c Client) CheckoutUser(email string) error {
-	_, err := c.db.Exec(checkoutUser, email)
-	return err
+	result, err := c.db.Exec(checkoutUser, email)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("participant not found for checkout")
+	}
+
+	return nil
 }
 
 const updateUser = `

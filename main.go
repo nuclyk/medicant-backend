@@ -91,16 +91,18 @@ func main() {
 
 	// Users Handlers
 	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
+
 	mux.HandleFunc("GET /api/users/{userID}", cfg.JWTAuth(cfg.handlerUserGet))
 	mux.HandleFunc("GET /api/users", cfg.JWTAuth(cfg.handlerUsersGet))
+	mux.HandleFunc("GET /api/users/checkedin", cfg.JWTAuth(cfg.handlerUsersGetCheckedIn))
+
 	mux.HandleFunc("PUT /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersUpdate))
 	mux.HandleFunc("PUT /api/users/password/{userID}", cfg.JWTAuth(cfg.handlerUsersChangePassword))
+	mux.HandleFunc("PUT /api/users", cfg.handlerUserCheckout)
+
 	mux.HandleFunc("DELETE /api/users/{userID}", cfg.JWTAuth(cfg.handlerUsersDelete))
 
 	mux.HandleFunc("POST /api/users/exists", cfg.handlerCheckForUser)
-
-	// Checkout
-	mux.HandleFunc("PUT /api/users", cfg.handlerUserCheckout)
 
 	// Retreat Handlers
 	mux.HandleFunc("POST /api/retreats", cfg.JWTAuth(cfg.handlerRetreatsCreate))
