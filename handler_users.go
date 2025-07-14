@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -22,7 +21,7 @@ type CreateUserParams struct {
 	Gender       string     `json:"gender,omitempty"`
 	Nationality  string     `json:"nationality,omitempty"`
 	Role         string     `json:"role,omitempty"`
-	RetreatID    int        `json:"retreat_id,omitempty"`
+	RetreatID    *int       `json:"retreat_id,omitempty"`
 	CheckInDate  *time.Time `json:"check_in_date,omitempty"`
 	CheckOutDate *time.Time `json:"check_out_date,omitempty"`
 	LeaveDate    *time.Time `json:"leave_date,omitempty"`
@@ -57,7 +56,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the user with this email already exists
-	users, err := cfg.db.GetUsers()
+	users, err := cfg.db.GetUsers("")
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
@@ -81,7 +80,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 		Gender:       params.Gender,
 		Nationality:  params.Nationality,
 		Role:         params.Role,
-		RetreatID:    params.RetreatID,
+		RetreatID:    *params.RetreatID,
 		CheckInDate:  params.CheckInDate,
 		CheckOutDate: params.CheckOutDate,
 		LeaveDate:    params.LeaveDate,
@@ -125,7 +124,17 @@ func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUs
 }
 
 func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	users, err := cfg.db.GetUsers()
+	users, err := cfg.db.GetUsers("")
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't get users", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
+}
+
+func (cfg Config) handlerUsersGetCheckedIn(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
+	users, err := cfg.db.GetUsers("checkedin")
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get users", err)
 		return
@@ -141,7 +150,7 @@ func (cfg Config) handlerCheckForUser(w http.ResponseWriter, r *http.Request) {
 
 	type Response struct {
 		Token  string `json:"token"`
-		UserID string `json:"userID"`
+		UserID string `json:"id"`
 	}
 
 	var email Email
@@ -220,11 +229,9 @@ func (cfg Config) handlerUserCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(user.Email)
-
 	err := cfg.db.CheckoutUser(user.Email)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error at check-out", err)
+		respondWithError(w, http.StatusBadRequest, "Participant not found", err)
 		return
 	}
 
@@ -295,8 +302,8 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 		user.Role = params.Role
 	}
 
-	if params.RetreatID != 0 {
-		user.RetreatID = params.RetreatID
+	if params.RetreatID != nil {
+		user.RetreatID = *params.RetreatID
 	}
 
 	if params.CheckInDate != nil {
@@ -309,13 +316,6 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 
 	if params.LeaveDate != nil {
 		user.LeaveDate = params.LeaveDate
-	}
-
-	// For the returning participants, if they use the same email,
-	// we needto reset their check-out date.
-	if params.Reset {
-		user.CheckOutDate = nil
-		user.IsCheckedIn = true
 	}
 
 	if params.Diet != nil {
@@ -340,6 +340,14 @@ func (cfg Config) handlerUsersUpdate(w http.ResponseWriter, r *http.Request, val
 
 	if params.Donation != nil {
 		user.Donation = *params.Donation
+	}
+
+	// For the returning participants, if they use the same email,
+	// we needto reset their check-out date.
+	if params.Reset {
+		user.CheckOutDate = nil
+		user.IsCheckedIn = true
+		user.Donation = 0
 	}
 
 	user, err = cfg.db.UpdateUser(userID, user)
