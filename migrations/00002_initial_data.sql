@@ -27,7 +27,7 @@ INSERT INTO
 VALUES
   (
     "00000000-0000-0000-0000-000000000000",
-    "$2a$12$arFsFZuNvcoRmtisfuJ9re0ByNVDjA6twSEvGC71C7ji8eOtNaccy",
+    "$2a$12$kCpK68vyJGM3hVfCgJN0zusd7g.a8O0h8lHJbEmTaXwtaE/xhfSA.",
     "admin@medicant.cc",
     "admin"
   );

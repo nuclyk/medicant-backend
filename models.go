@@ -11,24 +11,26 @@ import (
 )
 
 type Stats struct {
-	CheckedIn    int `json:"checked_in"`
-	ArrivedToday int `json:"arrived_today"`
-	LeavingToday int `json:"leaving_today"`
-	Males        int `json:"males"`
-	Females      int `json:"females"`
-	Vegetarian   int `json:"vegetarian"`
-	Volunteers   int `json:"volunteers"`
+	ParticipantsCount int `json:"participants_count"`
+	CheckedIn         int `json:"checked_in"`
+	ArrivedToday      int `json:"arrived_today"`
+	LeavingToday      int `json:"leaving_today"`
+	Males             int `json:"males"`
+	Females           int `json:"females"`
+	Vegetarian        int `json:"vegetarian"`
+	Volunteers        int `json:"volunteers"`
 }
 
 func (cfg Config) dbStatsToStats(stats *database.Stats) Stats {
 	return Stats{
-		CheckedIn:    stats.CheckedIn,
-		ArrivedToday: stats.ArrivedToday,
-		LeavingToday: stats.LeavingToday,
-		Males:        stats.Males,
-		Females:      stats.Females,
-		Vegetarian:   stats.Vegetarian,
-		Volunteers:   stats.Volunteers,
+		ParticipantsCount: stats.ParticipantsCount,
+		CheckedIn:         stats.CheckedIn,
+		ArrivedToday:      stats.ArrivedToday,
+		LeavingToday:      stats.LeavingToday,
+		Males:             stats.Males,
+		Females:           stats.Females,
+		Vegetarian:        stats.Vegetarian,
+		Volunteers:        stats.Volunteers,
 	}
 }
 

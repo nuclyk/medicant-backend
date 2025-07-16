@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   leave_date DATETIME,
   diet TEXT DEFAULT 'None',
   place INTEGER NOT NULL DEFAULT 1,
-  room_id INTEGER NOT NULL DEFAULT 1,
+  room_id INTEGER DEFAULT 1,
   donation INTEGER NOT NULL DEFAULT 0,
   is_checked_in BOOLEAN NOT NULL DEFAULT 1,
   FOREIGN KEY (role) REFERENCES roles (name) ON UPDATE CASCADE ON DELETE SET DEFAULT,
@@ -70,16 +70,16 @@ PRAGMA foreign_keys = ON;
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE users;
+DROP TABLE if exists users;
 
-DROP TABLE retreats;
+DROP TABLE if exists retreats;
 
-DROP TABLE roles;
+DROP TABLE if exists roles;
 
-DROP TABLE refresh_tokens;
+DROP TABLE if exists refresh_tokens;
 
-DROP TABLE places;
+DROP TABLE if exists places;
 
-DROP TABLE rooms;
+DROP TABLE if exists rooms;
 
 -- +goose StatementEnd

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/nuclyk/medicant/internal/auth"
@@ -56,7 +57,7 @@ func (cfg Config) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the user with this email already exists
-	users, err := cfg.db.GetUsers("")
+	users, err := cfg.db.GetUsers(database.Options{})
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't get users", err)
@@ -124,7 +125,32 @@ func (cfg Config) handlerUserGet(w http.ResponseWriter, r *http.Request, validUs
 }
 
 func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	users, err := cfg.db.GetUsers("")
+	var checked_in bool
+	var err error
+	page := -1
+
+	if r.URL.Query().Has("checked_in") {
+		checked_in, err = strconv.ParseBool(r.URL.Query().Get("checked_in"))
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error when parsing query parameter checked_in", err)
+			return
+		}
+	}
+
+	if r.URL.Query().Has("page") {
+		page, err = strconv.Atoi(r.URL.Query().Get("page"))
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error when parsing query parameter page", err)
+			return
+		}
+	}
+
+	options := database.Options{
+		Checked_in: checked_in,
+		Page:       page,
+	}
+
+	users, err := cfg.db.GetUsers(options)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get users", err)
 		return
@@ -133,15 +159,31 @@ func (cfg Config) handlerUsersGet(w http.ResponseWriter, r *http.Request, validU
 	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
 }
 
-func (cfg Config) handlerUsersGetCheckedIn(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
-	users, err := cfg.db.GetUsers("checkedin")
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't get users", err)
-		return
-	}
-
-	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
-}
+// func (cfg Config) handlerUsersGetCheckedIn(w http.ResponseWriter, r *http.Request, validUser auth.ValidUser) {
+// 	var checked_in bool
+//
+// 	if r.URL.Query().Has("checked_in") {
+// 		var err error
+// 		checked_in, err = strconv.ParseBool(r.URL.Query().Get("checked_in"))
+// 		if err != nil {
+// 			respondWithError(w, http.StatusInternalServerError, "Error when parsing query parameter checked_in", err)
+// 			return
+// 		}
+// 	}
+//
+// 	options := database.Options{
+// 		Checked_in: checked_in || false,
+// 		Limit:      r.URL.Query().Get("limit"),
+// 	}
+//
+// 	users, err := cfg.db.GetUsers(options)
+// 	if err != nil {
+// 		respondWithError(w, http.StatusInternalServerError, "Couldn't get users", err)
+// 		return
+// 	}
+//
+// 	respondWithJson(w, http.StatusOK, cfg.databaseUsersToUsers(users))
+// }
 
 func (cfg Config) handlerCheckForUser(w http.ResponseWriter, r *http.Request) {
 	type Email struct {

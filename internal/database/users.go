@@ -218,14 +218,26 @@ const getUsers = `
       users
     `
 
-func (c Client) GetUsers(option string) ([]User, error) {
+type Options struct {
+	Checked_in bool
+	Page       int
+}
+
+func (c Client) GetUsers(options Options) ([]User, error) {
 	c.log.Println("Getting all users")
 
 	query := getUsers
 
-	if option == "checkedin" {
-		query = query + "WHERE is_checked_in = 1"
+	if options.Checked_in {
+		query = query + " WHERE is_checked_in = 1"
 	}
+
+	if options.Page != -1 {
+		offset := options.Page * 50
+		query = query + fmt.Sprintf(" LIMIT 50 OFFSET %v", offset)
+	}
+
+	fmt.Println(options.Page)
 
 	rows, err := c.db.Query(query)
 

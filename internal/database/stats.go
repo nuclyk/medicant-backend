@@ -1,13 +1,14 @@
 package database
 
 type Stats struct {
-	CheckedIn    int
-	ArrivedToday int
-	LeavingToday int
-	Males        int
-	Females      int
-	Vegetarian   int
-	Volunteers   int
+	ParticipantsCount int
+	CheckedIn         int
+	ArrivedToday      int
+	LeavingToday      int
+	Males             int
+	Females           int
+	Vegetarian        int
+	Volunteers        int
 }
 
 const getStats = `SELECT * FROM stats;`
@@ -20,6 +21,7 @@ func (c Client) GetStats() (*Stats, error) {
 	var stats Stats
 
 	if err := row.Scan(
+		&stats.ParticipantsCount,
 		&stats.CheckedIn,
 		&stats.ArrivedToday,
 		&stats.LeavingToday,
